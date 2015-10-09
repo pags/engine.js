@@ -9,6 +9,8 @@ Controllers can listen for DOM events generated within their view, and change an
 
 Controllers are composable.
 
+Controllers' data sources are composable - they can be grouped arbitrarily in serial or parallel to maximize efficiency.
+
 If a model changes, automatically re-render the views of relevant controllers using DOM diffing.
 
 Models can also be programmatically changed.
