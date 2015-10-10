@@ -126,6 +126,12 @@ Set a value at a key.
 
 Will return `this` for chaining.
 
+#### `destroy(key)`
+
+Remove a key\value pair from the model.
+
+Will return `this` for chaining.
+
 #### `observe(key, f)`
 
 Observe changes to a key.  The callback `f` will be invoked with a frozen copy of the updated value whenever it is changed.
@@ -141,12 +147,6 @@ Will return `this` for chaining.
 #### `registerStoreForKey(key, storeName)`
 
 Register a key to be backed by a specific store.  By default, all keys are backed by the default memory store (JS heap).
-
-Will return `this` for chaining.
-
-#### `destroy(key)`
-
-Remove a key\value pair from the model.
 
 Will return `this` for chaining.
 
