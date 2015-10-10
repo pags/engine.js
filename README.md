@@ -3,7 +3,7 @@ Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, 
 
 ## Philosophy
 
-Controllers are primarily functions (templating engines) over a collection of static or dynamic (model) data sources that output a view (HTML).
+Controllers are primarily functions (templating engines) over a collection of static or model (dynamic) data sources that output a view (HTML).
 
 If a relevant data source changes, re-render.
 
