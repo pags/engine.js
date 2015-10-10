@@ -230,6 +230,8 @@
                 }
 
                 storesForKey[key] = storeName;
+
+                return this;
             },
 
             registerStore: function(name, store) {
@@ -238,6 +240,8 @@
                 }
 
                 stores[name] = store;
+
+                return this;
             },
 
             observe: function(key, f) {
@@ -262,10 +266,7 @@
             },
 
             get: function(key) {
-                return (stores[storesForKey[key] || DEFAULT_STORE]).get(key) || {
-                    key: key,
-                    value: void 0
-                };
+                return new ModelValue(key, (stores[storesForKey[key] || DEFAULT_STORE]).get(key));
             },
 
             set: function(key, value) {
@@ -277,7 +278,7 @@
 
                 Object.freeze(value);
 
-                stores[storesForKey[key] || DEFAULT_STORE].set(key, new ModelValue(key, value));
+                stores[storesForKey[key] || DEFAULT_STORE].set(key, value);
 
                 var watchersForNamespace = changeListeners[key];
 
@@ -290,10 +291,14 @@
                         });
                     }, 0);
                 }
+
+                return this;
             },
 
             destroy: function(key) {
                 stores[storesForKey[key] || DEFAULT_STORE].destroy(key);
+
+                return this;
             }
 
         };
