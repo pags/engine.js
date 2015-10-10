@@ -140,13 +140,13 @@ Will return `this` for chaining.
 
 #### `registerStoreForKey(key, storeName)`
 
-Register a key to be backed by a specific store.  By default, all keys are backed the default memory store (JS heap).
+Register a key to be backed by a specific store.  By default, all keys are backed by the default memory store (JS heap).
 
 Will return `this` for chaining.
 
 #### `destroy(key)`
 
-Removes entry from model.
+Remove an entry from the model.
 
 Will return `this` for chaining.
 
