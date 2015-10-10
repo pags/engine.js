@@ -66,6 +66,8 @@ If your value is an object, it will be returned as a frozen copy.
 
 Set a value at a key.
 
+Will return `this` for chaining.
+
 ###### `observe(key, f)`
 
 Observe changes to a key.  The callback `f` will be invoked with a frozen copy of the updated value whenever it is changed.
@@ -76,13 +78,19 @@ Will return a function that can be invoked to stop observing.
 
 Register a store.  A store is just a place to put your data, for example you might implement a localStorageStore or an xhrStore.  Stores must implement `get(key)`, `set(key, value)`, and `destroy(key)`.
 
+Will return `this` for chaining.
+
 ###### `registerStoreForKey(key, storeName)`
 
 Register a key to be backed by a specific store.  By default, all keys are backed the default memory store (JS heap).
 
+Will return `this` for chaining.
+
 ###### `destroy(key)`
 
 Removes entry from model.
+
+Will return `this` for chaining.
 
 ## Tests
 
