@@ -19,35 +19,46 @@ Instantiate a new Controller.  `el` can be a reference to an element, or a strin
 
 Generate the view based on the data (see `datasources`).  This method should return a string of HTML and must be implemented by you.  Generally this is as simple as passing the data and some specific template for the controller to your favorite templating engine.
 
-#### `instance.datasources`
+#### `(instance).datasources`
 
-#### `instance.render()`
+#### `(instance).render()`
 
 Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any data changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing.  Calls to `render` will cancel any other pending `render` calls in order to prevent race conditions.
 
 Will return a promise that resolves if and when that particular rendering call has completed.
 
-#### `instance.events`
+#### `(instance).events`
 
-#### `instance.own(f)`
+An optional object of the following format:
+
+```js
+{
+    'eventname selectors': function(event) { },
+    ...
+}
+```
+
+Exactly the same as `Backbone.View.events`.  Will only detect events from the controller's direct view, and *not* from child views.
+
+#### `(instance).own(f)`
 
 Add a cleanup function to be called when the controller is destroyed.
 
 Will return `this` for chaining.
 
-#### `instance.disown(f)`
+#### `(instance).disown(f)`
 
 Remove a previously added cleanup fucntion.
 
 Will return `this` for chaining.
 
-#### `instance.destroy()`
+#### `(instance).destroy()`
 
 Destroy all ownables and remove controller from the DOM.  Also destroys all of the controller's children.  Once a controller is destroyed, it is completely cleaned up and cannot be re-rendered.
 
 Will return `this` for chaining.
 
-#### `instance._createChildren()`
+#### `(instance)._createChildren()`
 
 Return a child or array of *un-rendered* children to be rendered within the controller's view.  To be implemented if necessary, but not called externally.
 
