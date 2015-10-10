@@ -11,7 +11,7 @@ Alternatively if using require.js, simply `require` the distribution file.  No g
 
 ### curvilinear.Controller
 
-#### `Controller(el)` (constructor)
+#### `new Controller(el)` (constructor)
 
 Instantiate a new Controller.  `el` can be a reference to an element, or a string element selector.  The controller will be rendered as a direct child of the element.
 
@@ -20,6 +20,46 @@ Instantiate a new Controller.  `el` can be a reference to an element, or a strin
 Generate the view based on the data (see `datasources`).  This method should return a string of HTML and must be implemented by you.  Generally this is as simple as passing the data and some specific template for the controller to your favorite templating engine.
 
 #### `(instance).datasources`
+
+An object or array of objects of the following format:
+
+```js
+{
+    key : function(data) { return value; },
+    ...
+}
+```js
+
+Datasource object keys and values get mapped directly to a `data` object that is passed to `generateHTML`.
+
+ex:
+```js
+{
+    foo : function(data) { return 'bar'; },
+    fizz : function(data) { return 'buzz'; }
+}
+
+`data` -> { foo : 'bar', fizz : 'buzz' }
+```js
+
+`data` will be frozen and cannot be mutated from anywhere other than `datasources`.
+
+Object values can return a literal or a promise.  If a value returns a call to `model.get`, the controller will automatically re-render itself is the value retrieved from `model` is updated.
+
+Additionally, `datasource` keys within an object will be resolved in parallel, while objects within an array will be resolved in serial.
+
+ex:
+```js
+[{
+    foo : function(data) { return 'bar'; },
+    fizz : function(data) { return 'buzz'; }
+},
+{
+    hello : function(data) { return 'world'; }
+}]
+```js
+
+`foo` and `fizz` will be resolved together, and `hello` will be resolved only once `foo` and `fizz` are.  In this way, asynchronous operations such as xhr calls can be grouped in parallel if they are not interdependent, or arranged in serial if they are.  `data` will contain intermediately resolved values along the way.
 
 #### `(instance).render()`
 
