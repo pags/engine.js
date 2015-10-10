@@ -26,7 +26,7 @@ An object or array of objects of the following format:
 ```js
 {
     key : function(data) { return value; },
-    ...
+    // ...
 }
 ```js
 
@@ -39,7 +39,7 @@ ex:
     fizz : function(data) { return 'buzz'; }
 }
 
-`data` -> { foo : 'bar', fizz : 'buzz' }
+data -> { foo : 'bar', fizz : 'buzz' }
 ```js
 
 `data` will be frozen and cannot be mutated from anywhere other than `datasources`.
