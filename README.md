@@ -1,12 +1,6 @@
 # curvilinear
 Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, bring your own templating engine.  IE9+.
 
-## Philosophy
-
-Controllers are primarily functions (templating engines) over a collection of static or model (dynamic) data sources that output a view (HTML).
-
-If a relevant data source changes, re-render.
-
 ## Usage
 
 `<script type="text/javascript" src="curvilinear/dist/curvilinear.min.js"></script>`
@@ -15,9 +9,9 @@ This will expose `curvilinear` on the global object.
 
 Alternatively if using require.js, simply `require` the distribution file.  No global will be exposed.
 
-##### curvilinear.Controller
+#### curvilinear.Controller
 
-##### curvilinear.model
+#### curvilinear.model
 
 ###### `get(key)`
 
