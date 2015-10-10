@@ -111,7 +111,7 @@ Get a value by key.
 
 Will return an object like:
 
-```js
+```
 {
     key: key,
     value: value
