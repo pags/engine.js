@@ -3,21 +3,9 @@ Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, 
 
 ## Philosophy
 
-Controllers are primarily functions (templating engines) over static or dynamic (model) data sources that output a view (HTML).
+Controllers are primarily functions (templating engines) over a collection of static or dynamic (model) data sources that output a view (HTML).
 
-Controllers can listen for DOM events generated within their view, and change any model, including ones they don't consume.  There is no god dispatcher or user-generated dispatch code.
-
-Controllers are composable.
-
-Controllers' data sources are composable - they can be grouped arbitrarily in serial or parallel to maximize efficiency.
-
-If a model changes, automatically re-render the views of relevant controllers using DOM diffing.
-
-Models can also be programmatically changed.
-
-Models can be backed by any form of persistence (store).
-
-That's it.
+If a relevant data source changes, re-render.
 
 ## Usage
 
