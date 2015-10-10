@@ -34,6 +34,8 @@ define([
             }
 
             storesForKey[key] = storeName;
+            
+            return this;
         },
 
         registerStore: function(name, store) {
@@ -42,6 +44,8 @@ define([
             }
 
             stores[name] = store;
+            
+            return this;
         },
 
         observe: function(key, f) {
@@ -91,10 +95,14 @@ define([
                     });
                 }, 0);
             }
+            
+            return this;
         },
 
         destroy: function(key) {
             stores[storesForKey[key] || DEFAULT_STORE].destroy(key);
+            
+            return this;
         }
 
     };
