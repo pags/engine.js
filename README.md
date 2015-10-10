@@ -146,7 +146,7 @@ Will return `this` for chaining.
 
 #### `destroy(key)`
 
-Remove an entry from the model.
+Remove a key\value pair from the model.
 
 Will return `this` for chaining.
 
