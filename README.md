@@ -55,7 +55,7 @@ Will return `this` for chaining.
 
 #### `(instance).destroy()`
 
-Destroy all ownables and remove controller from the DOM.  Also destroys all of the controller's children.  Once a controller is destroyed, it is completely cleaned up and cannot be re-rendered.
+Destroy all ownables and remove the controller.  Also destroys all of the controller's children.  Once a controller is destroyed, it is completely cleaned up and cannot be re-rendered.
 
 Will return `this` for chaining.
 
