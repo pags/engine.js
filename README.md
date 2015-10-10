@@ -29,11 +29,12 @@ Will return a promise that resolves if and when that particular rendering call h
 
 #### `(instance).events`
 
-An optional object of the following format:
+An optional object where the key is an event name, followed by a space, followed by any number of element selectors, and the value is an event handler that will be invoked with the event.
 
+ex:
 ```js
 {
-    'eventname selectors': function(event) { },
+    'change input': function(event) { ... },
     ...
 }
 ```
