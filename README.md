@@ -23,24 +23,24 @@ Generate the view based on the data (see `datasources`).  This method should ret
 
 An object or array of objects of the following format:
 
-```js
+```
 {
-    key : function(data) { return value; },
+    key : function(data) { return 'value'; },
     // ...
 }
-```js
+```
 
 Datasource object keys and values get mapped directly to a `data` object that is passed to `generateHTML`.
 
 ex:
-```js
+```
 {
     foo : function(data) { return 'bar'; },
     fizz : function(data) { return 'buzz'; }
 }
 
 data -> { foo : 'bar', fizz : 'buzz' }
-```js
+```
 
 `data` will be frozen and cannot be mutated from anywhere other than `datasources`.
 
@@ -49,7 +49,7 @@ Object values can return a literal or a promise.  If a value returns a call to `
 Additionally, `datasource` keys within an object will be resolved in parallel, while objects within an array will be resolved in serial.
 
 ex:
-```js
+```
 [{
     foo : function(data) { return 'bar'; },
     fizz : function(data) { return 'buzz'; }
@@ -57,7 +57,7 @@ ex:
 {
     hello : function(data) { return 'world'; }
 }]
-```js
+```
 
 `foo` and `fizz` will be resolved together, and `hello` will be resolved only once `foo` and `fizz` are.  In this way, asynchronous operations such as xhr calls can be grouped in parallel if they are not interdependent, or arranged in serial if they are.  `data` will contain intermediately resolved values along the way.
 
@@ -72,7 +72,7 @@ Will return a promise that resolves if and when that particular rendering call h
 An optional object where the key is an event name, followed by a space, followed by any number of element selectors, and the value is an event handler that will be invoked with the event.
 
 ex:
-```js
+```
 {
     'change input': function(event) { ... },
     ...
