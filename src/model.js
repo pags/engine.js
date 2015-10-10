@@ -66,10 +66,7 @@ define([
         },
 
         get: function(key) {
-            return (stores[storesForKey[key] || DEFAULT_STORE]).get(key) || {
-                key: key,
-                value: void 0
-            };
+            return new ModelValue(key, (stores[storesForKey[key] || DEFAULT_STORE]).get(key));
         },
 
         set: function(key, value) {
@@ -81,7 +78,7 @@ define([
 
             Object.freeze(value);
 
-            stores[storesForKey[key] || DEFAULT_STORE].set(key, new ModelValue(key, value));
+            stores[storesForKey[key] || DEFAULT_STORE].set(key, value);
 
             var watchersForNamespace = changeListeners[key];
 
