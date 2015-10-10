@@ -101,7 +101,7 @@ Will return `this` for chaining.
 
 #### `(instance)._createChildren()`
 
-Return a child or array of *un-rendered* children to be rendered within the controller's view.  To be implemented if necessary, but not called externally.
+Return an array of *un-rendered* children to be rendered within the controller's view.  To be implemented if necessary, but not called externally.
 
 ### curvilinear.model
 
