@@ -460,14 +460,19 @@
                             children = [children];
                         }
 
-                        children.forEach(function(child) {
-                            child.render();
+                        var childPromises = new Array(children.length);
+
+                        children.forEach(function(child, i) {
+                            childPromises[i] = child.render();
 
                             self._children.push(child);
                         });
+
+                        CurvilinearPromise.parallelize(childPromises).then(mainPromise.fulfill.bind(mainPromise, mainPromise.reject.bind(mainPromise)));
+                    } else {
+                        mainPromise.fulfill();
                     }
 
-                    mainPromise.fulfill();
                 } else {
                     mainPromise.reject(new CancellationError());
                 }

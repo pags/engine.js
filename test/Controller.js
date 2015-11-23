@@ -40,6 +40,20 @@ describe('Controller', function() {
 
     TestChildController.prototype = Object.create(TestController.prototype);
 
+    TestChildController.prototype.datasources = {
+        foo: function() {
+            var promise = new CurvilinearPromise();
+
+            setTimeout(function() {
+                promise.fulfill({
+                    title: 'hello world'
+                });
+            }, 100);
+
+            return promise;
+        }
+    };
+
     TestChildController.prototype.generateHTML = function(data) {
         return '<input id="child-input" type="text">';
     };
