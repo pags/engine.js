@@ -19,7 +19,7 @@ CommentExample.prototype.datasources = {
                 });
             });
             return comments;
-        }, function(err) {
+        }, function(xhr, status, err) {
             console.error(self.url, status, err.toString());
         });
     }
