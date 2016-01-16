@@ -69,8 +69,7 @@ CommentExample.prototype.generateHTML = function(data) {
 };
 
 var example = new CommentExample('#content', {
-    url: '/api/comments',
-    pollInterval: 2000
+    url: '/api/comments'
 });
 
 example.render();
