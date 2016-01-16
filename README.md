@@ -3,7 +3,7 @@ Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, 
 
 ## Example
 
-Compare the code in our example (`example.js`, utilizing Nunjucks.js for templating) to the one found in React's tutorial (https://github.com/reactjs/react-tutorial/blob/master/public/scripts/example.js) - same functionality, more concise code.
+Compare the code in our example (`example.js`, utilizing Nunjucks.js for templating) to the equivalent in React's tutorial (https://github.com/reactjs/react-tutorial/blob/master/public/scripts/example.js) - same functionality, more concise code.
 
 ## Usage
 
