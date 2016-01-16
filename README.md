@@ -1,6 +1,10 @@
 # curvilinear
 Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, bring your own templating engine.  IE9+.
 
+## Example
+
+Compare the code in our example utilizing Nunjucks.js to the one found in React's tutorial (https://github.com/reactjs/react-tutorial/blob/master/public/scripts/example.js) - same functionality, less lines of code.
+
 ## Usage
 
 `<script type="text/javascript" src="curvilinear/dist/curvilinear.min.js"></script>`
