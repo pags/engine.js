@@ -67,7 +67,7 @@ ex:
 
 #### `(instance).render()`
 
-Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any data changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing.  Calls to `render` will cancel any other pending `render` calls in order to prevent race conditions.
+Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any data changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing.  Calls to `render` will cancel any other pending `render` calls for the controller in order to prevent race conditions.
 
 Will return a promise that resolves if and when that particular rendering call has completed.
 
