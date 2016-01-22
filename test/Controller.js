@@ -269,7 +269,7 @@ describe('Controller', function() {
         done();
     });
 
-    it('allows nesting of child components', function(done) {
+    it('allows nesting of child controllers', function(done) {
         createEl();
 
         TestController.prototype.datasources = {
@@ -340,4 +340,55 @@ describe('Controller', function() {
 
         done();
     });
+
+    it('optimizes rendering of child controllers', function(done) {
+        createEl();
+
+        TestController.prototype.datasources = {
+            foo: function() {
+                return model.get('foo');
+            },
+            longrun: function() {
+                var promise = new CurvilinearPromise();
+
+                setTimeout(function() {
+                    promise.fulfill(true);
+                }, 500);
+
+                return promise;
+            }
+        };
+
+        parentInstance = new TestController(el);
+
+        TestChildController.prototype.datasources = {
+            foo: function() {
+                return model.get('foo');
+            }
+        };
+
+        var originalRender = TestChildController.prototype.render,
+            count = 0;
+
+        TestChildController.prototype.render = function() {
+            count++;
+
+            return originalRender.apply(this, arguments);
+        }
+
+        parentInstance._createChildren = function(data) {
+            return childInstance = new TestChildController('#test-child');
+        };
+
+        parentInstance.render().then(function() {
+            model.set('foo', 'bar');
+
+            setTimeout(function() {
+                expect(count).to.equal(2);
+
+                done();
+            }, 1000)
+        }, done);
+    });
+
 });

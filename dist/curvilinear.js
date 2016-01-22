@@ -404,6 +404,8 @@
 
             var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [];
 
+            self._modelKeys = {};
+
             datasources.forEach(function(source) {
                 pending.push(function() {
                     var sourceKeys = Object.keys(source),
@@ -424,12 +426,20 @@
                     });
 
                     return CurvilinearPromise.parallelize(promises).then(function(results) {
-                        if (!pending.cancelled) {
+                        if (!pending.cancelled && !self._destroyed) {
                             results.forEach(function(result, i) {
                                 var modelKey = result instanceof ModelValue && result.key;
 
                                 if (typeof modelKey === 'string') {
-                                    changeListenerDestroyFunctions.push(model.observe(modelKey, self.render.bind(self)));
+                                    self._modelKeys[modelKey] = true;
+
+                                    if (!self._parent || !self._parent._modelKeys[modelKey]) {
+                                        changeListenerDestroyFunctions.push(model.observe(modelKey, function() {
+                                            if (!self._destroyed) {
+                                                self.render();
+                                            }
+                                        }));
+                                    }
 
                                     result = result.value;
                                 }
@@ -444,7 +454,7 @@
             var mainPromise = new CurvilinearPromise();
 
             CurvilinearPromise.serialize(pending).then(function() {
-                if (!pending.cancelled) {
+                if (!pending.cancelled && !self._destroyed) {
                     self._data = Object.freeze(newData);
                     self._pending = null;
                     self._destroyChildren();
@@ -463,6 +473,8 @@
                         var childPromises = new Array(children.length);
 
                         children.forEach(function(child, i) {
+                            child._parent = self;
+
                             childPromises[i] = child.render();
 
                             self._children.push(child);
