@@ -232,6 +232,8 @@
         storesForKey = {},
         model = {
 
+            stores: stores,
+
             registerStoreForKey: function(key, storeName) {
                 if (typeof stores[storeName] === 'undefined') {
                     throw new Error('model.registerStoreForKey passed unknown store: ' + storeName);

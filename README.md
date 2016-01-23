@@ -144,7 +144,7 @@ Will return a function that can be invoked to stop observing.
 
 #### `registerStore(name, store)`
 
-Register a store.  A store is just a place to put your data, for example you might implement a localStorageStore or an xhrStore (see `examples`).  Stores must implement `get(key)`, `set(key, value)`, and `destroy(key)`.
+Register a store.  A store is just a place to put your data, for example you might implement an xhrStore or a localStorageStore (see `examples`).  Stores must implement `get(key)`, `set(key, value)`, and `destroy(key)`.
 
 Will return `this` for chaining.
 
