@@ -348,12 +348,15 @@ describe('Controller', function() {
             foo: function() {
                 return model.get('foo');
             },
+            bar: function() {
+                return model.get('bar');
+            },
             longrun: function() {
                 var promise = new CurvilinearPromise();
 
                 setTimeout(function() {
                     promise.fulfill(true);
-                }, 500);
+                }, 1);
 
                 return promise;
             }
@@ -368,13 +371,34 @@ describe('Controller', function() {
         };
 
         var originalRender = TestChildController.prototype.render,
-            count = 0;
+            childCount = 0,
+            subChildCount = 0;
 
         TestChildController.prototype.render = function() {
-            count++;
+            childCount++;
 
             return originalRender.apply(this, arguments);
         }
+
+        function SubTestController() {
+            TestController.apply(this, arguments);
+        }
+
+        SubTestController.prototype = Object.create(TestController.prototype);
+
+        SubTestController.prototype.render = function() {
+            subChildCount++;
+
+            return originalRender.apply(this, arguments);
+        }
+
+        TestChildController.prototype.generateHTML = function(data) {
+            return '<input id="child-input" type="text"><div id="subchild"></div>"';
+        };
+
+        TestChildController.prototype._createChildren = function(data) {
+            return subChildInstance = new SubTestController('#subchild');
+        };
 
         parentInstance._createChildren = function(data) {
             return childInstance = new TestChildController('#test-child');
@@ -384,10 +408,25 @@ describe('Controller', function() {
             model.set('foo', 'bar');
 
             setTimeout(function() {
-                expect(count).to.equal(2);
+                try {
+                    expect(childCount).to.equal(2);
+                    expect(subChildCount).to.equal(2);
 
-                done();
-            }, 1000)
+                    model.set('bar', 'buzz');
+
+                    setTimeout(function() {
+                        try {
+                            expect(subChildCount).to.equal(3);
+
+                            done();
+                        } catch (error) {
+                            done(error);
+                        }
+                    }, 100);
+                } catch (error) {
+                    done(error);
+                }
+            }, 100)
         }, done);
     });
 

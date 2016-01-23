@@ -404,7 +404,7 @@
 
             var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [];
 
-            self._modelKeys = {};
+            self._modelKeys = self._parent ? self._parent._modelKeys : {};
 
             datasources.forEach(function(source) {
                 pending.push(function() {
