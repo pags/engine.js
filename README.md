@@ -148,7 +148,7 @@ Register a store.  A store is just a place to put your data, for example you mig
 
 Will return `this` for chaining.
 
-#### `registerStoreForKey(key, storeName)`
+#### `registerStoreForKey({ key, store })`
 
 Register a key to be backed by a specific store.  By default, all keys are backed by the default memory store (JS heap).
 

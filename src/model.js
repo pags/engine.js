@@ -36,7 +36,10 @@ define([
 
         stores: stores,
 
-        registerStoreForKey: function(key, storeName) {
+        registerStoreForKey: function(options) {
+            var key = options.key,
+                storeName = options.store;
+
             if (typeof stores[storeName] === 'undefined') {
                 throw new Error('model.registerStoreForKey passed unknown store: ' + storeName);
             }

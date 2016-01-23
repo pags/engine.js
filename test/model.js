@@ -125,14 +125,20 @@ describe('model', function() {
 
     it('disallows the registration of keys to unknown stores', function(done) {
         expect(function() {
-            model.registerStoreForKey('witch', 'whatever');
+            model.registerStoreForKey({
+                key: 'witch',
+                store: 'whatever'
+            });
         }).to.throw;
 
         done();
     });
 
     it('allows the registration of keys to known stores', function(done) {
-        model.registerStoreForKey('witch', 'someStore');
+        model.registerStoreForKey({
+            key: 'witch',
+            store: 'someStore'
+        });
 
         model.set('witch', {
             seer: true

@@ -1,5 +1,8 @@
 (function() {
-    curvilinear.model.registerStoreForKey('items', 'collection');
+    curvilinear.model.registerStoreForKey({
+        key: 'items',
+        store: 'collection'
+    });
 
     var Application = BaseController.extend({
 
