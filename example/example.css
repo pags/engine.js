@@ -1,10 +1,11 @@
 body {
     font-family: sans-serif;
-    margin: 2rem;
+    margin: 1rem 2rem;
 }
 
 #summary {
     float: right;
+    margin-bottom: 1rem;
 }
 
 input {
