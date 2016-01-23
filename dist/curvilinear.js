@@ -43,6 +43,8 @@
                             node.setAttribute(name, value);
                         }
                     }
+
+                    node.checked = newNode.checked;
                 } else if (newNode.nodeType === 3) {
                     node.textContent = newNode.textContent;
                 }
