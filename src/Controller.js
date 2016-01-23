@@ -97,8 +97,6 @@ define([
 
             self._changeListenerDestroyFunctions.forEach(function(destroy) {
                 destroy();
-
-                self.disown(destroy);
             });
 
             var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [];
