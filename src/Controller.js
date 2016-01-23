@@ -101,7 +101,7 @@ define([
 
             var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [];
 
-            self._modelKeys = self._parent ? self._parent._modelKeys : {};
+            self._modelKeys = self._parent ? JSON.parse(JSON.stringify(self._parent._modelKeys)) : {};
 
             if (datasources) {
                 datasources = (datasources instanceof Array && datasources) || [datasources];

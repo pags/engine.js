@@ -341,6 +341,55 @@ describe('Controller', function() {
         done();
     });
 
+    it('manages modelkeys correctly', function(done) {
+        createEl();
+
+        function Child() {
+            Controller.apply(this, arguments);
+        }
+
+        Child.prototype = Object.create(Controller.prototype);
+
+        Child.prototype.datasources = {
+            test: function() {
+                return model.get('test');
+            }
+        };
+
+        Child.prototype.generateHTML = function(data) {
+            return '<div>' + data.test + '</div>';
+        };
+
+
+        function Application() {
+            Controller.apply(this, arguments);
+        }
+
+        Application.prototype = Object.create(Controller.prototype);
+
+        Application.prototype.generateHTML = function() {
+            return '<div id="child"></div>';
+        };
+
+        Application.prototype._createChildren = function() {
+            return [new Child('#child')];
+        };
+
+        new Application(el).render();
+
+        model.set('test', 'foo');
+
+        setTimeout(function() {
+            try {
+                expect(el.innerHTML).to.equal('<div id="child"><div>foo</div></div>');
+
+                done();
+            } catch (error) {
+                done(error);
+            }
+        }, 1);
+    });
+
     it('optimizes rendering of child controllers', function(done) {
         createEl();
 
