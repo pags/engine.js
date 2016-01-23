@@ -114,7 +114,7 @@ define([
                         sourceKeys.forEach(function(sourceKey, i) {
                             var sourceValue = source[sourceKey].call(self, newData);
 
-                            if (typeof sourceValue.then === 'function') {
+                            if (sourceValue !== null && typeof sourceValue !== 'undefined' && typeof sourceValue.then === 'function') {
                                 promises[i] = sourceValue;
                             } else {
                                 var sourcePromise = new CurvilinearPromise();
