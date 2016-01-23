@@ -90,12 +90,12 @@ define([
 
             value = JSON.parse(JSON.stringify(value));
 
-            Object.freeze(value);
-
             return (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value).then(function() {
                 var watchersForNamespace = changeListeners[key];
 
                 if (watchersForNamespace) {
+                    Object.freeze(value);
+
                     watchersForNamespace = watchersForNamespace.slice();
 
                     setTimeout(function() {
