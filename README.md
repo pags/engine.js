@@ -156,7 +156,7 @@ Will return `this` for chaining.
 
 #### `registerStoreForKey({ key, store })`
 
-Register a key to be backed by a specific store.  By default, all keys are backed by the default memory store (JS heap).
+Register a key to be backed by a specific store.  By default, all keys are backed by the memory store (JS heap).
 
 Will return `this` for chaining.
 
