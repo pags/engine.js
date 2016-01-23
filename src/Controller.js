@@ -84,15 +84,8 @@ define([
                 throw new Error('Cannot call `render` on a destroyed Controller');
             }
 
-            var datasources = this.datasources;
-
-            if (datasources === null || typeof datasources === 'undefined') {
-                throw new Error('Controller.datasources must be an Object or an Array of Object');
-            }
-
-            datasources = (datasources instanceof Array && datasources) || [datasources];
-
-            var self = this,
+            var datasources = this.datasources,
+                self = this,
                 pending = [],
                 newData = {};
 
@@ -112,50 +105,56 @@ define([
 
             self._modelKeys = self._parent ? self._parent._modelKeys : {};
 
-            datasources.forEach(function(source) {
-                pending.push(function() {
-                    var sourceKeys = Object.keys(source),
-                        promises = new Array(sourceKeys.length);
+            if (datasources) {
+                datasources = (datasources instanceof Array && datasources) || [datasources];
 
-                    sourceKeys.forEach(function(sourceKey, i) {
-                        var sourceValue = source[sourceKey].call(self, newData);
+                datasources.forEach(function(source) {
+                    pending.push(function() {
+                        var sourceKeys = Object.keys(source),
+                            promises = new Array(sourceKeys.length);
 
-                        if (typeof sourceValue.then === 'function') {
-                            promises[i] = sourceValue;
-                        } else {
-                            var sourcePromise = new CurvilinearPromise();
+                        sourceKeys.forEach(function(sourceKey, i) {
+                            var sourceValue = source[sourceKey].call(self, newData);
 
-                            promises[i] = sourcePromise;
+                            if (typeof sourceValue.then === 'function') {
+                                promises[i] = sourceValue;
+                            } else {
+                                var sourcePromise = new CurvilinearPromise();
 
-                            sourcePromise.fulfill(sourceValue);
-                        }
-                    });
+                                promises[i] = sourcePromise;
 
-                    return CurvilinearPromise.parallelize(promises).then(function(results) {
-                        if (!pending.cancelled && !self._destroyed) {
-                            results.forEach(function(result, i) {
-                                var modelKey = result instanceof ModelValue && result.key;
+                                sourcePromise.fulfill(sourceValue);
+                            }
+                        });
 
-                                if (typeof modelKey === 'string') {
-                                    self._modelKeys[modelKey] = true;
+                        return CurvilinearPromise.parallelize(promises).then(function(results) {
+                            if (!pending.cancelled && !self._destroyed) {
+                                results.forEach(function(result, i) {
+                                    var modelKey = result instanceof ModelValue && result.key;
 
-                                    if (!self._parent || !self._parent._modelKeys[modelKey]) {
-                                        changeListenerDestroyFunctions.push(model.observe(modelKey, function() {
-                                            if (!self._destroyed) {
-                                                self.render();
-                                            }
-                                        }));
+                                    if (typeof modelKey === 'string') {
+                                        self._modelKeys[modelKey] = true;
+
+                                        if (!self._parent || !self._parent._modelKeys[modelKey]) {
+                                            changeListenerDestroyFunctions.push(model.observe(modelKey, function() {
+                                                if (!self._destroyed) {
+                                                    self.render();
+                                                }
+                                            }));
+                                        }
+
+                                        result = result.value;
                                     }
 
-                                    result = result.value;
-                                }
-
-                                newData[sourceKeys[i]] = result;
-                            });
-                        }
+                                    newData[sourceKeys[i]] = result;
+                                });
+                            }
+                        });
                     });
                 });
-            });
+            } else {
+                pending = [new CurvilinearPromise().fulfill()];
+            }
 
             var mainPromise = new CurvilinearPromise();
 
