@@ -1,0 +1,34 @@
+body {
+    font-family: sans-serif;
+    margin: 2rem;
+}
+
+#summary {
+    float: right;
+}
+
+input {
+    margin: 0;
+    font-size: inherit;
+    padding: 0.5em;
+    border: 1px solid #d3d3d3;
+    text-overflow: ellipsis;
+}
+
+input,
+input:focus {
+    outline: none !important;
+}
+
+input[type="text"] {
+    width: 100%;
+}
+
+input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
