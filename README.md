@@ -1,5 +1,11 @@
 # curvilinear
-Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, bring your own templating engine.  IE9+.
+Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, bring your own templates.  IE9+.
+
+* Composable controllers - nest your controllers and let curvilinear determine what and when to re-render.
+* Centralized model - all data flows from a single source of truth, controllers don't own state.
+* No dispatchers - each controller declares its own data dependencies and how to resolve them in parallel or series.
+* DOM diffing - no need to wire up tedious DOM manipulation code.
+* AMD compatible.
 
 ## Example
 
