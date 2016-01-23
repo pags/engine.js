@@ -14,15 +14,28 @@
 
         },
 
-        datasources: {
+        datasources: [{
 
-            items: function() {
-                return model.get('items');
+                items: function() {
+                    return model.get('items');
+                }
+
+            },
+
+            {
+                itemsSorted: function(data) {
+                    return data.items && data.items.sort(function(a, b) {
+                        if (a.complete && !b.complete) {
+                            return 1;
+                        }
+
+                        return a.id - b.id;
+                    });
+                }
             }
+        ],
 
-        },
-
-        template: '<ul>{% for item in items %}<li><input type="checkbox" {% if item.complete %}checked{% endif %} data-id="{{item.id}}">{{item.text}}</li>{% endfor %}</ul>'
+        template: '<ul>{% for item in itemsSorted %}<li><input type="checkbox" {% if item.complete %}checked{% endif %} data-id="{{item.id}}">{{item.text}}</li>{% endfor %}</ul>'
 
     });
 }());
