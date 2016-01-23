@@ -113,7 +113,7 @@ Return an array of *un-rendered* children to be rendered within the controller's
 
 Get a value by key.
 
-Will return an object like:
+Will return a promise that resolves with an object like:
 
 ```
 {
@@ -128,13 +128,13 @@ If your value is an object, it will be returned as a frozen copy.
 
 Set a value at a key.
 
-Will return `this` for chaining.
+Will return a promise that resolves when the value is set (generally applicable to models that perform asynchronous operations).
 
 #### `destroy(key)`
 
 Remove a key\value pair from the model.
 
-Will return `this` for chaining.
+Will return a promise that resolves when the value is removed (generally applicable to models that perform asynchronous operations).
 
 #### `observe(key, f)`
 
@@ -144,7 +144,7 @@ Will return a function that can be invoked to stop observing.
 
 #### `registerStore(name, store)`
 
-Register a store.  A store is just a place to put your data, for example you might implement a localStorageStore or an xhrStore.  Stores must implement `get(key)`, `set(key, value)`, and `destroy(key)`.
+Register a store.  A store is just a place to put your data, for example you might implement a localStorageStore or an xhrStore (see `examples`).  Stores must implement `get(key)`, `set(key, value)`, and `destroy(key)`.
 
 Will return `this` for chaining.
 

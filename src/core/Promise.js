@@ -83,6 +83,8 @@ define(function() {
                     self._value = f(self._value);
                 });
             }
+
+            return this;
         },
 
         reject: function(reason) {
@@ -96,6 +98,8 @@ define(function() {
                     self._reason = f(self._reason);
                 });
             }
+
+            return this;
         }
 
     };

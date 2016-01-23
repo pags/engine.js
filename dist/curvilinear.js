@@ -183,6 +183,8 @@
                     self._value = f(self._value);
                 });
             }
+
+            return this;
         },
 
         reject: function(reason) {
@@ -196,6 +198,8 @@
                     self._reason = f(self._reason);
                 });
             }
+
+            return this;
         }
 
     };
@@ -207,15 +211,19 @@
                 _storage: {},
 
                 get: function(key) {
-                    return this._storage[key];
+                    return new CurvilinearPromise().fulfill(this._storage[key]);
                 },
 
                 set: function(key, value) {
                     this._storage[key] = value;
+
+                    return new CurvilinearPromise().fulfill();
                 },
 
                 destroy: function(key) {
                     delete this._storage[key];
+
+                    return new CurvilinearPromise().fulfill();
                 }
 
             }
@@ -266,7 +274,9 @@
             },
 
             get: function(key) {
-                return new ModelValue(key, (stores[storesForKey[key] || DEFAULT_STORE]).get(key));
+                return (stores[storesForKey[key] || DEFAULT_STORE]).get(key).then(function(value) {
+                    return new ModelValue(key, value);
+                });
             },
 
             set: function(key, value) {
@@ -278,27 +288,23 @@
 
                 Object.freeze(value);
 
-                stores[storesForKey[key] || DEFAULT_STORE].set(key, value);
+                return (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value).then(function() {
+                    var watchersForNamespace = changeListeners[key];
 
-                var watchersForNamespace = changeListeners[key];
+                    if (watchersForNamespace) {
+                        watchersForNamespace = watchersForNamespace.slice();
 
-                if (watchersForNamespace) {
-                    watchersForNamespace = watchersForNamespace.slice();
-
-                    setTimeout(function() {
-                        watchersForNamespace.forEach(function(watcher) {
-                            watcher(value);
-                        });
-                    }, 0);
-                }
-
-                return this;
+                        setTimeout(function() {
+                            watchersForNamespace.forEach(function(watcher) {
+                                watcher(value);
+                            });
+                        }, 0);
+                    }
+                });
             },
 
             destroy: function(key) {
-                stores[storesForKey[key] || DEFAULT_STORE].destroy(key);
-
-                return this;
+                return (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key);
             }
 
         };
