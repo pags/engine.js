@@ -134,13 +134,13 @@ If your value is an object, it will be returned as a frozen copy.
 
 Set a value at a key.
 
-Will return a promise that resolves when the value is set (generally applicable to models that perform asynchronous operations).
+Will return a promise that resolves when the value is set (generally applicable to stores that perform asynchronous operations).
 
 #### `destroy(key)`
 
 Remove a key\value pair from the model.
 
-Will return a promise that resolves when the value is removed (generally applicable to models that perform asynchronous operations).
+Will return a promise that resolves when the value is removed (generally applicable to stores that perform asynchronous operations).
 
 #### `observe(key, f)`
 
