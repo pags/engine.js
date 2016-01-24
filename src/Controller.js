@@ -17,7 +17,11 @@ define([
     CancellationError.prototype = Object.create(Error.prototype);
     CancellationError.prototype.constructor = CancellationError;
 
-    var crossbrowserMatches = Element.prototype.matches || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector;
+    var crossbrowserMatches = Element.prototype.matches || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector,
+        NO_BUBBLE = {
+            blur: true,
+            focus: true
+        };
 
     function Controller(el) {
         var typeofEl = typeof el;
@@ -36,43 +40,53 @@ define([
             self = this;
 
         if (events) {
-            var eventHandlersForType = this.eventHandlersForType = {};
+            var eventHandlersForType = this.eventHandlersForType = {},
+                manualHandlers = this.manualHandlers = [];
 
             Object.keys(events).forEach(function(k) {
                 var i = k.indexOf(' '),
                     type = k.substring(0, i);
 
-                function mainHandler(event) {
-                    event.stopPropagation();
+                if (NO_BUBBLE[type]) {
+                    manualHandlers.push({
+                        type: type,
+                        selector: k.substring(i + 1, k.length),
+                        handler: events[k].bind(self)
+                    });
+                } else {
+                    function mainHandler(event) {
+                        event.stopPropagation();
 
-                    eventHandlersForType[type].forEach(function(handler) {
-                        if (crossbrowserMatches.call(event.target || event.srcElement, handler.selector)) {
-                            handler.handler.call(self, event);
-                        }
+                        eventHandlersForType[type].forEach(function(handler) {
+                            if (crossbrowserMatches.call(event.target || event.srcElement, handler.selector)) {
+                                handler.handler.call(self, event);
+                            }
+                        });
+                    }
+
+                    if (!eventHandlersForType[type]) {
+                        eventHandlersForType[type] = [];
+
+                        self.el.addEventListener(type, mainHandler);
+
+                        self.own(function() {
+                            self.el.removeEventListener(type, mainHandler);
+                        });
+                    }
+
+                    eventHandlersForType[type].push({
+
+                        selector: k.substring(i + 1, k.length),
+
+                        handler: events[k].bind(self)
+
                     });
                 }
-
-                if (!eventHandlersForType[type]) {
-                    eventHandlersForType[type] = [];
-
-                    self.el.addEventListener(type, mainHandler);
-
-                    self.own(function() {
-                        self.el.removeEventListener(type, mainHandler);
-                    });
-                }
-
-                eventHandlersForType[type].push({
-
-                    selector: k.substring(i + 1, k.length),
-
-                    handler: events[k].bind(self)
-
-                });
             });
         }
 
         this._changeListenerDestroyFunctions = [];
+        this._manualListenerDestroyFunctions = [];
         this._children = [];
         this._data = Object.freeze({});
     }
@@ -99,7 +113,12 @@ define([
                 destroy();
             });
 
-            var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [];
+            self._manualListenerDestroyFunctions.forEach(function(destroy) {
+                destroy();
+            });
+
+            var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [],
+                manualListenerDestroyFunctions = self._manualListenerDestroyFunctions = [];
 
             self._modelKeys = self._parent ? JSON.parse(JSON.stringify(self._parent._modelKeys)) : {};
 
@@ -166,6 +185,23 @@ define([
 
                     self._transform(self.el, self.el.outerHTML.replace(self.el.innerHTML + closingTag, self.generateHTML(self._data) + closingTag));
 
+                    if (self.manualHandlers) {
+                        self.manualHandlers.forEach(function(handler) {
+                            var elements = self.el.querySelectorAll(handler.selector),
+                                l = elements.length;
+
+                            while (l--) {
+                                var selected = elements[l];
+
+                                selected.addEventListener(handler.type, handler.handler);
+
+                                manualListenerDestroyFunctions.push(function() {
+                                    selected.removeEventListener(handler.type, handler.handler);
+                                });
+                            }
+                        });
+                    }
+
                     var children = self._createChildren(self._data);
 
                     if (children) {
@@ -187,7 +223,6 @@ define([
                     } else {
                         mainPromise.fulfill();
                     }
-
                 } else {
                     mainPromise.reject(new CancellationError());
                 }
@@ -208,6 +243,10 @@ define([
             }
 
             this._changeListenerDestroyFunctions.forEach(function(destroy) {
+                destroy();
+            });
+
+            this._manualListenerDestroyFunctions.forEach(function(destroy) {
                 destroy();
             });
 

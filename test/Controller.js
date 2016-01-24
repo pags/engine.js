@@ -26,6 +26,12 @@ describe('Controller', function() {
 
         'change input': function(e) {
             this.render();
+        },
+
+        'blur input': function(e) {
+            model.set('foo', {
+                bar: 'heynow'
+            })
         }
 
     };
@@ -187,6 +193,33 @@ describe('Controller', function() {
         setTimeout(function() {
             try {
                 expect(el.innerHTML).to.equal('<div><div>witch</div><div>hello world</div><div>eventTest</div><input type="text"></div>');
+
+                done();
+            } catch (error) {
+                done(error);
+            }
+        }, 1);
+    });
+
+    it('handles events that don\'t bubble', function(done) {
+        var input = el.querySelector('input');
+
+        input.value = 'eventTest';
+        input.setAttribute('value', 'eventTest');
+
+        if (typeof document.createEvent === 'function') {
+            var e = document.createEvent('HTMLEvents');
+
+            e.initEvent('blur', true, true);
+
+            input.dispatchEvent(e);
+        } else {
+            input.fireEvent('onblur');
+        }
+
+        setTimeout(function() {
+            try {
+                expect(el.innerHTML).to.equal('<div><div>heynow</div><div>hello world</div><div>eventTest</div><input type="text"></div>');
 
                 done();
             } catch (error) {
