@@ -27,7 +27,7 @@
 
         }],
 
-        template: '<div>{{items|length}} TODOs ({{completedCount}} completed)</div>'
+        view: '<div>{{items|length}} TODOs ({{completedCount}} completed)</div>'
 
     });
 }());

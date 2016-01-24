@@ -35,7 +35,7 @@
             }
         ],
 
-        template: '<ul>{% for item in itemsSorted %}<li><label><input type="checkbox" {% if item.complete %}checked{% endif %} data-id="{{item.id}}">{{item.text}}</label></li>{% endfor %}</ul>'
+        view: '<ul>{% for item in itemsSorted %}<li><label><input type="checkbox" {% if item.complete %}checked{% endif %} data-id="{{item.id}}">{{item.text}}</label></li>{% endfor %}</ul>'
 
     });
 }());

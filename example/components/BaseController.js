@@ -12,7 +12,7 @@
 
     // Set up templating with nunjucks
     BaseController.prototype.generateHTML = function(data) {
-        return nunjucks.renderString(this.template, data);
+        return nunjucks.renderString(this.view, data);
     }
 
     // Add Backbone-style inheritance convenience

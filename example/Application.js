@@ -14,7 +14,7 @@
 
         // If using require.js, the `text` plugin would allow templates to be managed within
         // their own files, rather than be defined inline as a literal string.
-        template: '<div id="summary"></div><div id="input"></div><div id="list"></div>',
+        view: '<div id="summary"></div><div id="input"></div><div id="list"></div>',
 
         _createChildren: function() {
             return [

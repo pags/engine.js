@@ -15,7 +15,7 @@
 
         },
 
-        template: '<input type="text" placeholder="Enter TODO item">'
+        view: '<input type="text" placeholder="Enter TODO item">'
 
     });
 }());
