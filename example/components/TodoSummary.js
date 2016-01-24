@@ -6,7 +6,7 @@
         datasources: [{
 
             items: function() {
-                return model.get('items');
+                return model.get('curvilinearItems');
             }
 
         }, {

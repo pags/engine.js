@@ -6,7 +6,7 @@
     // which allows the management of collections of data under a single key,
     // and saves to local storage.  Without this call, keys will use the default store (see README).
     curvilinear.model.registerStoreForKey({
-        key: 'items',
+        key: 'curvilinearItems',
         store: 'collection'
     });
 

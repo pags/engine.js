@@ -3,22 +3,10 @@ body {
     margin: 1rem 2rem;
 }
 
-#summary {
-    float: right;
-    margin-bottom: 1rem;
-}
-
 input {
     margin: 0;
     font-size: inherit;
     padding: 0.5em;
-    border: 1px solid #d3d3d3;
-    text-overflow: ellipsis;
-}
-
-input,
-input:focus {
-    outline: none !important;
 }
 
 input[type="text"] {
@@ -32,4 +20,9 @@ input[type="checkbox"] {
 ul {
     list-style-type: none;
     padding: 0;
+}
+
+#summary {
+    float: right;
+    margin-bottom: 1rem;
 }

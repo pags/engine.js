@@ -6,7 +6,7 @@
         events: {
 
             'change input': function(event) {
-                model.set('items', {
+                model.set('curvilinearItems', {
                     text: event.target.value
                 });
 

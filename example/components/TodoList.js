@@ -6,7 +6,7 @@
         events: {
 
             'change input[type="checkbox"]': function(event) {
-                model.set('items', {
+                model.set('curvilinearItems', {
                     id: event.target.getAttribute('data-id'),
                     complete: event.target.checked
                 });
@@ -17,7 +17,7 @@
         datasources: [{
 
                 items: function() {
-                    return model.get('items');
+                    return model.get('curvilinearItems');
                 }
 
             },
