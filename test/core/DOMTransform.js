@@ -76,6 +76,10 @@ describe('DOMTransform', function() {
         assertTransform('<div>one<div>two</div></div>', '<div>one</div>', done);
     });
 
+    it('removes multiple old child elements', function(done) {
+        assertTransform('<div><div>one</div><div>two</div></div>', '<div></div>', done);
+    });
+
     it('removes old sibling elements', function(done) {
         assertTransform('<div>one</div><div>two</div>', '<div>one</div>', done);
     });

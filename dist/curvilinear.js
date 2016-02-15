@@ -67,6 +67,12 @@
 
                 node = node.firstChild;
             } else {
+                if (!newNode.firstChild) {
+                    while (node.firstChild) {
+                        node.removeChild(node.firstChild);
+                    }
+                }
+
                 nextNewNode = newNode.nextSibling;
 
                 if (nextNewNode) {
