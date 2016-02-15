@@ -78,6 +78,10 @@
                 if (nextNewNode) {
                     node = node.nextSibling;
                 } else {
+                    while (node.nextSibling) {
+                        node.parentNode.removeChild(node.nextSibling);
+                    }
+
                     do {
                         if (node.nextSibling) {
                             node.parentNode.removeChild(node.nextSibling);
