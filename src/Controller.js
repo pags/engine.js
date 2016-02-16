@@ -17,12 +17,6 @@ define([
     CancellationError.prototype = Object.create(Error.prototype);
     CancellationError.prototype.constructor = CancellationError;
 
-    var crossbrowserMatches = Element.prototype.matches || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector,
-        NO_BUBBLE = {
-            blur: true,
-            focus: true
-        };
-
     function Controller(el) {
         var typeofEl = typeof el;
 
@@ -40,48 +34,17 @@ define([
             self = this;
 
         if (events) {
-            var eventHandlersForType = this.eventHandlersForType = {},
-                manualHandlers = this.manualHandlers = [];
+            var manualHandlers = this.manualHandlers = [];
 
             Object.keys(events).forEach(function(k) {
                 var i = k.indexOf(' '),
                     type = k.substring(0, i);
 
-                if (NO_BUBBLE[type]) {
-                    manualHandlers.push({
-                        type: type,
-                        selector: k.substring(i + 1, k.length),
-                        handler: events[k].bind(self)
-                    });
-                } else {
-                    function mainHandler(event) {
-                        event.stopPropagation();
-
-                        eventHandlersForType[type].forEach(function(handler) {
-                            if (crossbrowserMatches.call(event.target || event.srcElement, handler.selector)) {
-                                handler.handler.call(self, event);
-                            }
-                        });
-                    }
-
-                    if (!eventHandlersForType[type]) {
-                        eventHandlersForType[type] = [];
-
-                        self.el.addEventListener(type, mainHandler);
-
-                        self.own(function() {
-                            self.el.removeEventListener(type, mainHandler);
-                        });
-                    }
-
-                    eventHandlersForType[type].push({
-
-                        selector: k.substring(i + 1, k.length),
-
-                        handler: events[k].bind(self)
-
-                    });
-                }
+                manualHandlers.push({
+                    type: type,
+                    selector: k.substring(i + 1, k.length),
+                    handler: events[k].bind(self)
+                });
             });
         }
 
