@@ -6,14 +6,14 @@
 
     function BaseController() {
         Controller.apply(this, arguments);
-    };
+    }
 
     BaseController.prototype = Object.create(Controller.prototype);
 
     // Set up templating with nunjucks
     BaseController.prototype.generateHTML = function(data) {
         return nunjucks.renderString(this.view, data);
-    }
+    };
 
     // Add Backbone-style inheritance convenience
     BaseController.extend = function(def) {
@@ -32,7 +32,7 @@
         Type.extend = BaseController.extend;
 
         return Type;
-    }
+    };
 
     window.BaseController = BaseController;
 }());
