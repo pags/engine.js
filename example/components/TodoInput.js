@@ -7,7 +7,8 @@
 
             'change input': function(event) {
                 model.set('curvilinearItems', {
-                    text: event.target.value
+                    text: event.target.value,
+                    complete: false
                 });
 
                 event.target.value = '';

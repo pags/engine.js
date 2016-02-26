@@ -25,8 +25,8 @@
             {
                 itemsSorted: function(data) {
                     return data.items && data.items.sort(function(a, b) {
-                        if (a.complete && !b.complete) {
-                            return 1;
+                        if (a.complete !== b.complete) {
+                            return a.complete ? 1 : -1;
                         }
 
                         return a.id - b.id;
