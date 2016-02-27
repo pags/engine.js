@@ -1,6 +1,10 @@
+0.2.0
+=====
+Optimize rendering of children.
+
 0.1.3
 =====
-Tweaked example.
+Tweak example.
 
 0.1.2
 =====

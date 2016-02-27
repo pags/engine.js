@@ -302,6 +302,20 @@ describe('Controller', function() {
         done();
     });
 
+    it('rejects child controllers that are initialized with element references', function(done) {
+        createEl();
+
+        var controller = new TestController(el);
+
+        controller._createChildren = function() {
+            return [new TestChildController(document.body)]
+        }
+
+        expect(controller.render.bind(controller)).to.throw;
+
+        done();
+    });
+
     it('allows nesting of child controllers', function(done) {
         createEl();
 
