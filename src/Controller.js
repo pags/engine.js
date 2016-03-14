@@ -160,6 +160,8 @@ define([
                             children.forEach(function(child, i) {
                                 if (!child._selector) {
                                     throw new Error('Child controller root elements must be initialized with a string selector and not an element reference!');
+                                } else {
+                                    child.el = self.el.querySelector(child._selector);
                                 }
 
                                 childPromises[i] = child.render();
@@ -295,7 +297,7 @@ define([
             if (el) {
                 var newEl = document.createElement('body'),
                     closingTag = '</' + this.el.tagName.toLowerCase() + '>',
-                    html = this.el.outerHTML.replace(this.el.innerHTML + closingTag, this.generateHTML(this._data) + closingTag)
+                    html = this.el.outerHTML.replace(this.el.innerHTML + closingTag, this.generateHTML(this._data) + closingTag);
 
                 newEl.innerHTML = html;
 
@@ -314,13 +316,23 @@ define([
 
                 DOMTransform(newEl.childNodes[0], el);
 
-                this._children.forEach(function(child) {
-                    child.el = el.querySelector(child._selector);
-                    child._manualListenerDestroyFunctions.forEach(function(destroy) {
-                        destroy();
+                var childrenToProcess = this._children;
+
+                while (childrenToProcess.length) {
+                    var newChildrenToProcess = [];
+
+                    childrenToProcess.forEach(function(c) {
+                        c.el = el.querySelector(c._selector);
+                        c._manualListenerDestroyFunctions.forEach(function(destroy) {
+                            destroy();
+                        });
+                        c._initializeEvents();
+
+                        newChildrenToProcess = newChildrenToProcess.concat(c._children);
                     });
-                    child._initializeEvents();
-                });
+
+                    childrenToProcess = newChildrenToProcess;
+                }
 
                 return true;
             }

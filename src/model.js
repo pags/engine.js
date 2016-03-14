@@ -93,25 +93,35 @@ define([
 
             value = JSON.parse(JSON.stringify(value));
 
+            var self = this;
+
             return (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value).then(function() {
                 Object.freeze(value);
 
-                var watchersForNamespace = changeListeners[key];
-
-                if (watchersForNamespace) {
-                    watchersForNamespace = watchersForNamespace.slice();
-
-                    setTimeout(function() {
-                        watchersForNamespace.forEach(function(watcher) {
-                            watcher(value);
-                        });
-                    }, 0);
-                }
+                self.trigger(key, value);
             });
         },
 
         destroy: function(key) {
-            return (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key);
+            var self = this;
+
+            return (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key).then(function() {
+                self.trigger(key);
+            });
+        },
+
+        trigger: function(key, value) {
+            var watchersForNamespace = changeListeners[key];
+
+            if (watchersForNamespace) {
+                watchersForNamespace = watchersForNamespace.slice();
+
+                setTimeout(function() {
+                    watchersForNamespace.forEach(function(watcher) {
+                        watcher(value);
+                    });
+                }, 0);
+            }
         }
 
     };

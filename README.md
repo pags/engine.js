@@ -54,7 +54,7 @@ data -> { foo : 'bar', fizz : 'buzz' }
 
 `data` will be frozen and cannot be mutated from anywhere other than `datasources`.
 
-Object value functions can return an immediate value or a promise.  If a value returns a call to `model.get`, the controller will automatically re-render itself if the value retrieved from `model` is updated.
+Object value functions can return an immediate value or a promise.  If a value function returns the result of a call to `model.get`, the controller will automatically re-render itself if the value retrieved from `model` is updated.
 
 Additionally, `datasource` keys within an object will be resolved in parallel, while objects within an array will be resolved in serial.
 
@@ -73,13 +73,13 @@ ex:
 
 #### `(instance).render()`
 
-Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any data changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing.  Calls to `render` will cancel any other pending `render` calls for the controller in order to prevent race conditions.
+Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any model changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing, so UI state such as input focus or scroll position is preserved.  Calls to `render` will cancel any other pending `render` calls for the controller in order to prevent race conditions.
 
 Will return a promise that resolves if and when that particular rendering call has completed.
 
 #### `(instance).events`
 
-An optional object where the key is an event name, followed by a space, followed by any number of element selectors, and the value is an event handler that will be invoked with the event.
+An optional object where the key is a string starting with a native DOM event type, followed by a space, followed by any number of element selectors, and the value is an event handler that will be invoked with the event and bound to the controller instance.
 
 ex:
 ```
@@ -99,7 +99,7 @@ Will return `this` for chaining.
 
 #### `(instance).disown(f)`
 
-Remove a previously added cleanup fucntion.
+Remove a previously added cleanup function.
 
 Will return `this` for chaining.
 
