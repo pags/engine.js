@@ -1,7 +1,9 @@
 0.2.1
 =====
 Make `model.destroy` trigger change watchers.
+
 Fix rendering of children nested more than one level deep.
+
 Readme tweaks.
 
 0.2.0
