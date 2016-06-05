@@ -1,10 +1,9 @@
 describe('model', function() {
     var expect = window.chai.expect,
-        model = window.curvilinear.model,
-        CurvilinearPromise = window.curvilinear.Promise;
+        model = window.curvilinear.model;
 
     it('returns a dummy object with a change function when no data is set', function(done) {
-        model.get('foo').then(function(mv) {
+        model.get('foo', function(error, mv) {
             expect(typeof mv).to.equal('object');
 
             done();
@@ -34,7 +33,7 @@ describe('model', function() {
     });
 
     it('returns appropriate values', function(done) {
-        model.get('foo').then(function(mv) {
+        model.get('foo', function(error, mv) {
             var value = mv.value;
 
             expect(value.bar).to.equal('baz');
@@ -44,7 +43,7 @@ describe('model', function() {
 
             expect(value.hello).to.be.undefined;
 
-            model.get('foo').then(function(mv2) {
+            model.get('foo', function(error, mv2) {
                 expect(mv2.value.hello).to.be.undefined;
 
                 done();
@@ -53,7 +52,7 @@ describe('model', function() {
     });
 
     it('notifies change watchers', function(done) {
-        model.get('foo').then(function(mv) {
+        model.get('foo', function(error, mv) {
             var value = mv.value,
                 remove = model.observe('foo', function(newValue) {
                     try {
@@ -77,8 +76,8 @@ describe('model', function() {
     });
 
     it('allows destruction of values', function(done) {
-        model.destroy('foo').then(function() {
-            model.get('foo').then(function(mv) {
+        model.destroy('foo', function() {
+            model.get('foo', function(error, mv) {
                 expect(mv.value).to.be.undefined;
 
                 done();
@@ -102,20 +101,26 @@ describe('model', function() {
 
         model.registerStore('someStore', {
 
-            get: function(value) {
-                return new CurvilinearPromise().fulfill(someStoreStorage[value]);
+            get: function(value, cb) {
+                cb(null, someStoreStorage[value]);
+
+                return this;
             },
 
-            set: function(key, value) {
+            set: function(key, value, cb) {
                 someStoreStorage[key] = value;
 
-                return new CurvilinearPromise().fulfill();
+                cb();
+
+                return this;
             },
 
             destroy: function(key) {
                 delete someStoreStorage[key];
 
-                return new CurvilinearPromise().fulfill();
+                cb();
+
+                return this;
             }
 
         });
@@ -142,7 +147,7 @@ describe('model', function() {
 
         model.set('witch', {
             seer: true
-        }).then(function() {
+        }, function() {
             var remove = model.observe('witch', function(newValue) {
                 try {
                     remove();
@@ -155,7 +160,7 @@ describe('model', function() {
                 }
             });
 
-            model.get('witch').then(function(mv) {
+            model.get('witch', function(error, mv) {
                 expect(mv.value.seer).to.equal(true);
 
                 done();

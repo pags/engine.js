@@ -1,9 +1,7 @@
 define([
-    './core/ModelValue',
-    './core/Promise'
+    './core/ModelValue'
 ], function(
-    ModelValue,
-    CurvilinearPromise
+    ModelValue
 ) {
     var DEFAULT_STORE = 'memory',
         stores = {
@@ -11,20 +9,20 @@ define([
 
                 _storage: {},
 
-                get: function(key) {
-                    return new CurvilinearPromise().fulfill(this._storage[key]);
+                get: function(key, cb) {
+                    cb(null, this._storage[key]);
                 },
 
-                set: function(key, value) {
+                set: function(key, value, cb) {
                     this._storage[key] = value;
 
-                    return new CurvilinearPromise().fulfill();
+                    cb(null);
                 },
 
-                destroy: function(key) {
+                destroy: function(key, cb) {
                     delete this._storage[key];
 
-                    return new CurvilinearPromise().fulfill();
+                    cb(null);
                 }
 
             }
@@ -80,13 +78,21 @@ define([
             };
         },
 
-        get: function(key) {
-            return (stores[storesForKey[key] || DEFAULT_STORE]).get(key).then(function(value) {
-                return new ModelValue(key, value);
+        get: function(key, cb) {
+            (stores[storesForKey[key] || DEFAULT_STORE]).get(key, function(error, value) {
+                if (cb) {
+                    if (error) {
+                        cb(error);
+                    } else {
+                        cb(null, new ModelValue(key, value))
+                    }
+                }
             });
+
+            return this;
         },
 
-        set: function(key, value) {
+        set: function(key, value, cb) {
             if (typeof key !== 'string') {
                 throw new TypeError('model.set only accepts key of type "string"');
             }
@@ -95,19 +101,35 @@ define([
 
             var self = this;
 
-            return (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value).then(function() {
-                Object.freeze(value);
+            (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value, function(error) {
+                if (!error) {
+                    Object.freeze(value);
 
-                self.trigger(key, value);
+                    self.trigger(key, value);
+                }
+
+                if (cb) {
+                    cb(error);
+                }
             });
+
+            return this;
         },
 
-        destroy: function(key) {
+        destroy: function(key, cb) {
             var self = this;
 
-            return (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key).then(function() {
-                self.trigger(key);
+            (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key, function(error) {
+                if (!error) {
+                    self.trigger(key);
+                }
+
+                if (cb) {
+                    cb(error);
+                }
             });
+
+            return this;
         },
 
         trigger: function(key, value) {

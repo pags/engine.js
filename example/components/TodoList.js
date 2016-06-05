@@ -17,7 +17,7 @@
         datasources: [{
 
                 items: function() {
-                    return model.get('curvilinearItems');
+                    return Q.ninvoke(model, 'get', 'curvilinearItems');
                 }
 
             },

@@ -1,5 +1,5 @@
 # curvilinear
-Experimental MVC framework for the web.  ~2KB minified\gzipped, 0 dependencies, bring your own templates.  IE9+.
+Experimental MVC framework for the web.  ~2.5KB minified\gzipped, 0 dependencies, bring your own templates.  IE9+.
 
 * Composable controllers - nest your controllers and let curvilinear determine what and when to re-render.
 * Centralized model - all data flows from a single source of truth, controllers don't own state.
@@ -71,11 +71,11 @@ ex:
 
 `foo` and `fizz` will be resolved together, and `hello` will be resolved only once `foo` and `fizz` are.  In this way, asynchronous operations such as xhr calls can be grouped in parallel if they are not interdependent, or arranged in serial if they are.  `data` will contain intermediately resolved values along the way.
 
-#### `(instance).render()`
+#### `(instance).render(callback)`
 
 Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any model changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing, so UI state such as input focus or scroll position is preserved.  Calls to `render` will cancel any other pending `render` calls for the controller in order to prevent race conditions.
 
-Will return a promise that resolves if and when that particular rendering call has completed.
+Callback will be called when that particular rendering call has completed.
 
 #### `(instance).events`
 
@@ -103,6 +103,12 @@ Remove a previously added cleanup function.
 
 Will return `this` for chaining.
 
+#### `(instance).detach()`
+
+Remove a controller from the DOM.  Use this if you plan to reattach the controller later.
+
+Will return `this` for chaining.
+
 #### `(instance).destroy()`
 
 Destroy all ownables and remove the controller.  Will automatically remove all event listeners added via `events`.  Also destroys all of the controller's children.  Once a controller is destroyed, it should be completely cleaned up and cannot be re-rendered.
@@ -117,11 +123,11 @@ Child components constructed in this method *must* be passed an element string s
 
 ### curvilinear.model
 
-#### `get(key)`
+#### `get(key, callback)`
 
 Get a value by key.
 
-Will return a promise that resolves with an object like:
+Callback will be called with an object like:
 
 ```
 {
@@ -132,17 +138,23 @@ Will return a promise that resolves with an object like:
 
 If your value is an object, it will be returned as a frozen copy.
 
-#### `set(key, value)`
+Will return `this` for chaining.
+
+#### `set(key, value, callback)`
 
 Set a value at a key.
 
-Will return a promise that resolves when the value is set (generally applicable to stores that perform asynchronous operations).
+Callback will be called when the value is set (generally applicable to stores that perform asynchronous operations).
 
-#### `destroy(key)`
+Will return `this` for chaining.
+
+#### `destroy(key, callback)`
 
 Remove a key\value pair from the model.
 
-Will return a promise that resolves when the value is removed (generally applicable to stores that perform asynchronous operations).
+Callback will be called when the value is removed (generally applicable to stores that perform asynchronous operations).
+
+Will return `this` for chaining.
 
 #### `observe(key, f)`
 

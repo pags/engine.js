@@ -5,12 +5,12 @@
     var model = curvilinear.model;
 
     model.registerStore('collection', {
-        get: function(key) {
-            return model.stores.localStorage.get(key);
+        get: function(key, cb) {
+            return model.stores.localStorage.get(key, cb);
         },
 
-        set: function(key, value) {
-            return this.get(key).then(function(values) {
+        set: function(key, value, cb) {
+            return this.get(key, function(error, values) {
                 if (values) {
                     if (typeof value.id === 'undefined') {
                         var highest = 0;
@@ -36,17 +36,17 @@
                         }
                     }
 
-                    return model.stores.localStorage.set(key, values);
+                    model.stores.localStorage.set(key, values, cb);
                 } else {
                     value.id = 0;
 
-                    return model.stores.localStorage.set(key, [value]);
+                    model.stores.localStorage.set(key, [value], cb);
                 }
             });
         },
 
-        destroy: function(key) {
-            return model.stores.localStorage.destroy(key);
+        destroy: function(key, cb) {
+            return model.stores.localStorage.destroy(key, cb);
         }
     });
 }());

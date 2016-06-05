@@ -1,6 +1,6 @@
 describe('Controller', function() {
-    var expect = window.chai.expect,
-        CurvilinearPromise = window.curvilinear.Promise,
+    var Q = window.Q,
+        expect = window.chai.expect,
         Controller = window.curvilinear.Controller,
         model = window.curvilinear.model,
         el,
@@ -48,15 +48,15 @@ describe('Controller', function() {
 
     TestChildController.prototype.datasources = {
         foo: function() {
-            var promise = new CurvilinearPromise();
+            var deferred = Q.defer();
 
             setTimeout(function() {
-                promise.fulfill({
+                deferred.resolve({
                     title: 'hello world'
                 });
             }, 100);
 
-            return promise;
+            return deferred.promise;
         }
     };
 
@@ -83,7 +83,11 @@ describe('Controller', function() {
     it('takes element selectors', function(done) {
         createEl();
 
-        expect(new TestController('#controller').destroy().el).to.equal(el);
+        var c = new TestController('#controller');
+
+        expect(c.el).to.equal(el);
+
+        c.destroy();
 
         done();
     });
@@ -91,7 +95,11 @@ describe('Controller', function() {
     it('takes elements', function(done) {
         createEl();
 
-        expect(new TestController(el).destroy().el).to.equal(el);
+        var c = new TestController(el);
+
+        expect(c.el).to.equal(el);
+
+        c.destroy();
 
         done();
     });
@@ -105,13 +113,17 @@ describe('Controller', function() {
 
         TestController.prototype.datasources = {
             foo: function() {
-                return model.get('foo');
+                return Q.ninvoke(model, 'get', 'foo');
             }
         };
 
         finalInstance = new TestController(el);
 
-        finalInstance.render().then(function() {
+        finalInstance.render(function(error) {
+            if (error) {
+                done(error);
+            }
+
             try {
                 expect(el.innerHTML).to.equal('<div><div>baz</div><div></div><div></div><input type="text"></div>');
 
@@ -119,27 +131,27 @@ describe('Controller', function() {
             } catch (error) {
                 done(error);
             }
-        }, done);
+        });
     });
 
     it('renders initially for a queue of groups of datasources', function(done) {
         TestController.prototype.datasources = [{
             asyncSource: function() {
-                var promise = new CurvilinearPromise();
+                var deferred = Q.defer();
 
                 setTimeout(function() {
-                    promise.fulfill({
+                    deferred.resolve({
                         title: 'hello world'
-                    });
+            });
                 }, 1);
 
-                return promise;
+                return deferred.promise;
             }
         }, {
             foo: function(data) {
                 expect(data.asyncSource.title).to.equal('hello world');
 
-                return model.get('foo');
+                return Q.ninvoke(model, 'get', 'foo');
             },
 
             input: function() {
@@ -147,7 +159,11 @@ describe('Controller', function() {
             }
         }];
 
-        finalInstance.render().then(function() {
+        finalInstance.render(function(error) {
+            if (error) {
+                done(error);
+            }
+
             try {
                 expect(el.innerHTML).to.equal('<div><div>baz</div><div>hello world</div><div></div><input type="text"></div>');
 
@@ -155,7 +171,7 @@ describe('Controller', function() {
             } catch (error) {
                 done(error);
             }
-        }, done);
+        });
     });
 
     it('automatically re-renders when datasources change', function(done) {
@@ -198,7 +214,7 @@ describe('Controller', function() {
             } catch (error) {
                 done(error);
             }
-        }, 1);
+        }, 50);
     });
 
     it('handles events that don\'t bubble', function(done) {
@@ -229,7 +245,7 @@ describe('Controller', function() {
     });
 
     it('cancels pending rendering', function(done) {
-        var stalledPromise = new CurvilinearPromise(),
+        var stalledDeferred = Q.defer(),
             count = 0;
 
         function StalledController() {
@@ -241,7 +257,7 @@ describe('Controller', function() {
         StalledController.prototype.datasources = {
 
             foo: function() {
-                return count++ === 0 ? stalledPromise : 1;
+                return count++ === 0 ? stalledDeferred.promise : 1;
             }
 
         };
@@ -254,14 +270,16 @@ describe('Controller', function() {
 
         var stalledInstance = new StalledController(stalledEl);
 
-        stalledInstance.render().then(function() {
-            done(new Error());
-        }, function(error) {
-            done();
+        stalledInstance.render(function(error) {
+            if (error) {
+                done();
+            } else {
+                done(new Error());
+            }
         });
 
-        stalledInstance.render().then(function() {
-            stalledPromise.fulfill();
+        stalledInstance.render(function() {
+            stalledDeferred.resolve();
         });
     });
 
@@ -335,11 +353,19 @@ describe('Controller', function() {
             return childInstance = new TestChildController('#test-child');
         };
 
-        parentInstance.render().then(function() {
+        parentInstance.render(function(error) {
+            if (error) {
+                done(error);
+            }
+
             try {
                 expect(el.innerHTML).to.equal('<div id="test-child"><input id="child-input" type="text"></div>');
 
-                parentInstance.render().then(function() {
+                parentInstance.render(function(error) {
+                    if (error) {
+                        done(error);
+                    }
+
                     try {
                         expect(el.innerHTML).to.equal('<div id="test-child"><input id="child-input" type="text"></div>');
 
@@ -347,11 +373,11 @@ describe('Controller', function() {
                     } catch (error) {
                         done(error);
                     }
-                }, done);
+                });
             } catch (error) {
                 done(error);
             }
-        }, done);
+        });
     });
 
     it('doesn\'t respond to events dispatched from child component elements', function(done) {
@@ -399,7 +425,7 @@ describe('Controller', function() {
 
         Child.prototype.datasources = {
             test: function() {
-                return model.get('test');
+                return Q.ninvoke(model, 'get', 'test');
             }
         };
 
@@ -434,7 +460,7 @@ describe('Controller', function() {
             } catch (error) {
                 done(error);
             }
-        }, 1);
+        }, 10);
     });
 
     it('optimizes rendering of child controllers', function(done) {
@@ -442,19 +468,19 @@ describe('Controller', function() {
 
         TestController.prototype.datasources = {
             foo: function() {
-                return model.get('foo');
+                return Q.ninvoke(model, 'get', 'foo');
             },
             bar: function() {
-                return model.get('bar');
+                return Q.ninvoke(model, 'get', 'bar');
             },
             longrun: function() {
-                var promise = new CurvilinearPromise();
+                var deferred = Q.defer();
 
                 setTimeout(function() {
-                    promise.fulfill(true);
+                    deferred.resolve(true);
                 }, 1);
 
-                return promise;
+                return deferred.promise;
             }
         };
 
@@ -462,7 +488,7 @@ describe('Controller', function() {
 
         TestChildController.prototype.datasources = {
             foo: function() {
-                return model.get('foo');
+                return Q.ninvoke(model, 'get', 'foo');
             }
         };
 
@@ -500,7 +526,11 @@ describe('Controller', function() {
             return childInstance = new TestChildController('#test-child');
         };
 
-        parentInstance.render().then(function() {
+        parentInstance.render(function(error) {
+            if (error) {
+                done(error);
+            }
+
             model.set('foo', 'bar');
 
             setTimeout(function() {
@@ -523,7 +553,7 @@ describe('Controller', function() {
                     done(error);
                 }
             }, 100)
-        }, done);
+        });
     });
 
 });

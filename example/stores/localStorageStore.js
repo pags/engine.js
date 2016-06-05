@@ -2,25 +2,29 @@
  * Allows persistence of data to local storage.
  */
 (function() {
-    var CurvilinearPromise = curvilinear.Promise;
-
     curvilinear.model.registerStore('localStorage', {
-        get: function(key) {
+        get: function(key, cb) {
             var value = window.localStorage[key];
 
-            return new CurvilinearPromise().fulfill(typeof value === 'undefined' ? value : JSON.parse(value));
+            cb(null, typeof value === 'undefined' ? value : JSON.parse(value));
+
+            return this;
         },
 
-        set: function(key, value) {
+        set: function(key, value, cb) {
             window.localStorage[key] = JSON.stringify(value);
 
-            return new CurvilinearPromise().fulfill();
+            cb();
+
+            return this;
         },
 
-        destroy: function(key) {
+        destroy: function(key, cb) {
             delete window.localStorage[key];
 
-            return new CurvilinearPromise().fulfill();
+            cb();
+
+            return this;
         }
     });
 }());
