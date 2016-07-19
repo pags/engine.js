@@ -649,7 +649,7 @@
                 this._pending.cancelled = true;
             }
 
-            var pending = this._pending = this._parentPending || {};
+            var pending = this._pending = {};
 
             function complete(error) {
                 self._pending = null;
@@ -664,7 +664,7 @@
             }
 
             this._resolveDataSources(resolveFrom || 0, function(error) {
-                if (pending.cancelled) {
+                if (pending.cancelled || (self._parentPending && self._parentPending.cancelled)) {
                     return;
                 }
 
