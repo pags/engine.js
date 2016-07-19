@@ -84,7 +84,7 @@ define([
                     if (error) {
                         cb(error);
                     } else {
-                        cb(null, new ModelValue(key, value))
+                        cb(null, new ModelValue(key, value));
                     }
                 }
             });
@@ -97,19 +97,29 @@ define([
                 throw new TypeError('model.set only accepts key of type "string"');
             }
 
-            value = JSON.parse(JSON.stringify(value));
-
             var self = this;
 
-            (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value, function(error) {
-                if (!error) {
-                    Object.freeze(value);
+            this.get(key, function(error, current) {
+                if (error) {
+                    if (cb) {
+                        cb(error);
+                    }
+                } else if (current.value !== value) {
+                    value = JSON.parse(JSON.stringify(value));
 
-                    self.trigger(key, value);
-                }
+                    (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value, function(setError) {
+                        if (!setError) {
+                            Object.freeze(value);
 
-                if (cb) {
-                    cb(error);
+                            self.trigger(key, value);
+                        }
+
+                        if (cb) {
+                            cb(setError);
+                        }
+                    });
+                } else if (cb) {
+                    cb();
                 }
             });
 
@@ -119,13 +129,23 @@ define([
         destroy: function(key, cb) {
             var self = this;
 
-            (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key, function(error) {
-                if (!error) {
-                    self.trigger(key);
-                }
+            this.get(key, function(error, current) {
+                if (error) {
+                    if (cb) {
+                        cb(error);
+                    }
+                } else if (typeof current.value !== 'undefined') {
+                    (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key, function(destroyError) {
+                        if (!destroyError) {
+                            self.trigger(key);
+                        }
 
-                if (cb) {
-                    cb(error);
+                        if (cb) {
+                            cb(destroyError);
+                        }
+                    });
+                } else if (cb) {
+                    cb();
                 }
             });
 

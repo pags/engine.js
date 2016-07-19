@@ -16,15 +16,23 @@
         // their own files, rather than be defined inline as a literal string.
         view: '<div id="summary"></div><div id="input"></div><div id="list"></div>',
 
-        _createChildren: function() {
-            return [
-                new TodoInput('#input'),
-                new TodoList('#list'),
-                new TodoSummary('#summary')
-            ]
+        children: {
+
+            '#input': function(el) {
+                return new TodoInput(el);
+            },
+
+            '#list': function(el) {
+                return new TodoList(el);
+            },
+
+            '#summary': function(el) {
+                return new TodoSummary(el);
+            }
+
         }
 
     });
 
-    new Application('#application').render();
+    new Application('#application').start();
 }());

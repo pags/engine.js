@@ -25,13 +25,13 @@ describe('Controller', function() {
     TestController.prototype.events = {
 
         'change input': function(e) {
-            this.render();
+            this.start();
         },
 
         'blur input': function(e) {
             model.set('foo', {
                 bar: 'heynow'
-            })
+            });
         }
 
     };
@@ -119,7 +119,7 @@ describe('Controller', function() {
 
         finalInstance = new TestController(el);
 
-        finalInstance.render(function(error) {
+        finalInstance.start(function(error) {
             if (error) {
                 done(error);
             }
@@ -142,7 +142,7 @@ describe('Controller', function() {
                 setTimeout(function() {
                     deferred.resolve({
                         title: 'hello world'
-            });
+                    });
                 }, 1);
 
                 return deferred.promise;
@@ -159,7 +159,7 @@ describe('Controller', function() {
             }
         }];
 
-        finalInstance.render(function(error) {
+        finalInstance.start(function(error) {
             if (error) {
                 done(error);
             }
@@ -187,7 +187,7 @@ describe('Controller', function() {
             } catch (error) {
                 done(error);
             }
-        }, 50);
+        }, 20);
     });
 
     it('allows event handling', function(done) {
@@ -214,34 +214,7 @@ describe('Controller', function() {
             } catch (error) {
                 done(error);
             }
-        }, 50);
-    });
-
-    it('handles events that don\'t bubble', function(done) {
-        var input = el.querySelector('input');
-
-        input.value = 'eventTest';
-        input.setAttribute('value', 'eventTest');
-
-        if (typeof document.createEvent === 'function') {
-            var e = document.createEvent('HTMLEvents');
-
-            e.initEvent('blur', true, true);
-
-            input.dispatchEvent(e);
-        } else {
-            input.fireEvent('onblur');
-        }
-
-        setTimeout(function() {
-            try {
-                expect(el.innerHTML).to.equal('<div><div>heynow</div><div>hello world</div><div>eventTest</div><input type="text"></div>');
-
-                done();
-            } catch (error) {
-                done(error);
-            }
-        }, 50);
+        }, 10);
     });
 
     it('cancels pending rendering', function(done) {
@@ -270,23 +243,25 @@ describe('Controller', function() {
 
         var stalledInstance = new StalledController(stalledEl);
 
-        stalledInstance.render(function(error) {
+        stalledInstance.start(function(error) {
             if (error) {
-                done();
+                done(error);
             } else {
-                done(new Error());
+                done(new Error('Stalled instance not cancelled.'));
             }
         });
 
-        stalledInstance.render(function() {
-            stalledDeferred.resolve();
+        stalledInstance.start(function() {
+            stalledDeferred.resolve({
+                bar: 'baz'
+            });
         });
     });
 
     it('destroys', function(done) {
         finalInstance.destroy();
 
-        expect(finalInstance.render.bind(finalInstance)).to.throw;
+        expect(finalInstance.start.bind(finalInstance)).to.throw(Error);
 
         model.set('foo', {});
 
@@ -320,20 +295,6 @@ describe('Controller', function() {
         done();
     });
 
-    it('rejects child controllers that are initialized with element references', function(done) {
-        createEl();
-
-        var controller = new TestController(el);
-
-        controller._createChildren = function() {
-            return [new TestChildController(document.body)]
-        }
-
-        expect(controller.render.bind(controller)).to.throw;
-
-        done();
-    });
-
     it('allows nesting of child controllers', function(done) {
         createEl();
 
@@ -349,11 +310,15 @@ describe('Controller', function() {
 
         parentInstance = new TestController(el);
 
-        parentInstance._createChildren = function(data) {
-            return childInstance = new TestChildController('#test-child');
+        parentInstance.children = {
+
+            '#test-child': function(e) {
+                return childInstance = new TestChildController(e);
+            }
+
         };
 
-        parentInstance.render(function(error) {
+        parentInstance.start(function(error) {
             if (error) {
                 done(error);
             }
@@ -361,7 +326,7 @@ describe('Controller', function() {
             try {
                 expect(el.innerHTML).to.equal('<div id="test-child"><input id="child-input" type="text"></div>');
 
-                parentInstance.render(function(error) {
+                parentInstance.start(function(error) {
                     if (error) {
                         done(error);
                     }
@@ -400,16 +365,13 @@ describe('Controller', function() {
             input.fireEvent('onchange');
         }
 
-        setTimeout(function() {
-            done();
-        }, 50);
+        done();
     });
 
     it('properly destroys children', function(done) {
         parentInstance.destroy();
 
-        expect(parentInstance.render.bind(parentInstance)).to.throw;
-        expect(childInstance.render.bind(childInstance)).to.throw;
+        expect(childInstance.start.bind(childInstance)).to.throw(Error);
 
         done();
     });
@@ -444,11 +406,15 @@ describe('Controller', function() {
             return '<div id="child"></div>';
         };
 
-        Application.prototype._createChildren = function() {
-            return [new Child('#child')];
+        Application.prototype.children = {
+
+            '#child': function(e) {
+                return new Child(e);
+            }
+
         };
 
-        new Application(el).render();
+        new Application(el).start();
 
         model.set('test', 'foo');
 
@@ -492,15 +458,15 @@ describe('Controller', function() {
             }
         };
 
-        var originalRender = TestChildController.prototype.render,
+        var originalRender = TestChildController.prototype.start,
             childCount = 0,
             subChildCount = 0;
 
-        TestChildController.prototype.render = function() {
+        TestChildController.prototype.start = function() {
             childCount++;
 
             return originalRender.apply(this, arguments);
-        }
+        };
 
         function SubTestController() {
             TestController.apply(this, arguments);
@@ -508,25 +474,33 @@ describe('Controller', function() {
 
         SubTestController.prototype = Object.create(TestController.prototype);
 
-        SubTestController.prototype.render = function() {
+        SubTestController.prototype.start = function() {
             subChildCount++;
 
             return originalRender.apply(this, arguments);
-        }
+        };
 
         TestChildController.prototype.generateHTML = function(data) {
             return '<input id="child-input" type="text"><div id="subchild"></div>"';
         };
 
-        TestChildController.prototype._createChildren = function(data) {
-            return subChildInstance = new SubTestController('#subchild');
+        TestChildController.prototype.children = {
+
+            '#subchild': function(e) {
+                return subChildInstance = new SubTestController(e);
+            }
+
         };
 
-        parentInstance._createChildren = function(data) {
-            return childInstance = new TestChildController('#test-child');
+        parentInstance.children = {
+
+            '#test-child': function(e) {
+                return childInstance = new TestChildController(e);
+            }
+
         };
 
-        parentInstance.render(function(error) {
+        parentInstance.start(function(error) {
             if (error) {
                 done(error);
             }
@@ -548,11 +522,11 @@ describe('Controller', function() {
                         } catch (error) {
                             done(error);
                         }
-                    }, 100);
+                    }, 5);
                 } catch (error) {
                     done(error);
                 }
-            }, 100)
+            }, 5);
         });
     });
 

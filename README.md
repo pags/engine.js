@@ -71,11 +71,29 @@ ex:
 
 `foo` and `fizz` will be resolved together, and `hello` will be resolved only once `foo` and `fizz` are.  In this way, asynchronous operations such as xhr calls can be grouped in parallel if they are not interdependent, or arranged in serial if they are.  `data` will contain intermediately resolved values along the way.
 
-#### `(instance).render(callback)`
+#### `(instance).start(callback)`
 
-Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any model changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing, so UI state such as input focus or scroll position is preserved.  Calls to `render` will cancel any other pending `render` calls for the controller in order to prevent race conditions.
+Render the controller - this will resolve all `datasources` and call `generateHTML`.  Generally you only need to call this method once in order to kick things off - any model changes will automatically cause a re-render.  Re-renders are achieved via DOM diffing, so UI state such as input focus or scroll position is preserved.  Calls to `start` will cancel any other pending `start` calls for the controller in order to prevent race conditions.
 
 Callback will be called when that particular rendering call has completed.
+
+Will return `this` for chaining.
+
+#### `(instance).children`
+
+An optional object where the key is an element selector, and the value is a function that will be invoked with an element reference matching the selector in the key.  This function should return an *un-started* child that is instantiated with the supplied element reference.
+
+ex:
+```
+{
+    '.child': function(el) {
+        return new Child(el);
+    },
+    ...
+}
+```
+
+This is allows for arbitrary composition of controllers.
 
 #### `(instance).events`
 
@@ -103,23 +121,11 @@ Remove a previously added cleanup function.
 
 Will return `this` for chaining.
 
-#### `(instance).detach()`
-
-Remove a controller from the DOM.  Use this if you plan to reattach the controller later.
-
-Will return `this` for chaining.
-
 #### `(instance).destroy()`
 
 Destroy all ownables and remove the controller.  Will automatically remove all event listeners added via `events`.  Also destroys all of the controller's children.  Once a controller is destroyed, it should be completely cleaned up and cannot be re-rendered.
 
 Will return `this` for chaining.
-
-#### `(instance)._createChildren()`
-
-Return an array of *un-rendered* children to be rendered within this controller's view.  This method should be implemented if necessary, but never explicitly called.
-
-Child components constructed in this method *must* be passed an element string selector, and not an element reference.
 
 ### curvilinear.model
 

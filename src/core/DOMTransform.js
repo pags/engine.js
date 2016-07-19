@@ -1,11 +1,23 @@
 define(function() {
-    return function(newNode, node) {
+    return function(newNode, node, blacklist) {
         var parent = null,
             root = newNode,
-            clonedNode;
+            clonedNode,
+            blacklisted;
+
+        if (blacklist) {
+            var keys = Object.keys(blacklist);
+
+            blacklisted = new Array(keys.length);
+
+            keys.forEach(function(key, i) {
+                blacklisted[i] = blacklist[key].el;
+            });
+        }
 
         do {
-            var ignoreChildren = false;
+            var ignoreChildren = false,
+                isBlacklisted = false;
 
             if (!node) {
                 clonedNode = newNode.cloneNode(true);
@@ -17,47 +29,51 @@ define(function() {
                 parent = node.parentNode;
 
                 ignoreChildren = true;
-            } else if (node.tagName === newNode.tagName) {
-                if (newNode.nodeType === 1) {
-                    var name;
+            } else if (!blacklisted || blacklisted.indexOf(node) === -1) {
+                if (node.tagName === newNode.tagName) {
+                    if (newNode.nodeType === 1) {
+                        var name;
 
-                    for (var attributes = Array.prototype.slice.call(node.attributes), i = 0, l = attributes.length; i < l; i++) {
-                        name = attributes[i].name;
+                        for (var attributes = Array.prototype.slice.call(node.attributes), i = 0, l = attributes.length; i < l; i++) {
+                            name = attributes[i].name;
 
-                        if (!newNode.hasAttribute(name)) {
-                            node.removeAttribute(name);
+                            if (!newNode.hasAttribute(name)) {
+                                node.removeAttribute(name);
+                            }
                         }
-                    }
 
-                    attributes = newNode.attributes;
-                    i = 0;
-                    l = attributes.length;
+                        attributes = newNode.attributes;
+                        i = 0;
+                        l = attributes.length;
 
-                    for (; i < l; i++) {
-                        var attribute = attributes[i],
-                            value = attribute.value;
+                        for (; i < l; i++) {
+                            var attribute = attributes[i],
+                                value = attribute.value;
 
-                        name = attribute.name;
+                            name = attribute.name;
 
-                        if (node.getAttribute(name) !== value) {
-                            node.setAttribute(name, value);
+                            if (node.getAttribute(name) !== value) {
+                                node.setAttribute(name, value);
+                            }
                         }
-                    }
 
-                    node.checked = newNode.checked;
-                } else if (newNode.nodeType === 3) {
-                    node.textContent = newNode.textContent;
+                        node.checked = newNode.checked;
+                    } else if (newNode.nodeType === 3) {
+                        node.textContent = newNode.textContent;
+                    }
+                } else {
+                    clonedNode = newNode.cloneNode(true);
+
+                    node.parentNode.replaceChild(clonedNode, node);
+
+                    node = clonedNode;
+
+                    parent = node.parentNode;
+
+                    ignoreChildren = true;
                 }
             } else {
-                clonedNode = newNode.cloneNode(true);
-
-                node.parentNode.replaceChild(clonedNode, node);
-
-                node = clonedNode;
-
-                parent = node.parentNode;
-
-                ignoreChildren = true;
+                isBlacklisted = true;
             }
 
             var nextNewNode = (!ignoreChildren && newNode.firstChild);
@@ -67,7 +83,7 @@ define(function() {
 
                 node = node.firstChild;
             } else {
-                if (!newNode.firstChild) {
+                if (!isBlacklisted && !newNode.firstChild) {
                     while (node.firstChild) {
                         node.removeChild(node.firstChild);
                     }
@@ -91,7 +107,7 @@ define(function() {
                     } while ((newNode = newNode.parentNode) && newNode !== root && !newNode.nextSibling);
 
                     if (newNode === root) {
-                        return false;
+                        return;
                     }
 
                     parent = node.parentNode;

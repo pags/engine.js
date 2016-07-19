@@ -1,6 +1,7 @@
 0.3.0
 =====
 Re-create previously removed children if root element re-appears.
+
 Remove use of promises.
 
 0.2.1

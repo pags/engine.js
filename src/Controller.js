@@ -7,14 +7,6 @@ define([
     ModelValue,
     model
 ) {
-    function CancellationError() {
-        this.name = 'CancellationError';
-        this.message = ' ';
-    }
-
-    CancellationError.prototype = Object.create(Error.prototype);
-    CancellationError.prototype.constructor = CancellationError;
-
     function Controller(el) {
         var typeofEl = typeof el;
 
@@ -33,209 +25,247 @@ define([
             throw new Error('Could not find element for selector "' + el + '"');
         }
 
-        var events = this.events,
-            self = this;
-
-        if (events) {
-            var manualHandlers = this.manualHandlers = [];
-
-            Object.keys(events).forEach(function(k) {
-                var i = k.indexOf(' '),
-                    type = k.substring(0, i);
-
-                manualHandlers.push({
-                    type: type,
-                    selector: k.substring(i + 1, k.length),
-                    handler: events[k].bind(self)
-                });
-            });
-        }
-
-        this._changeListenerDestroyFunctions = [];
-        this._manualListenerDestroyFunctions = [];
-        this._children = [];
-        this._data = Object.freeze({});
+        this._changeListenerDestructors = {};
+        this._childInstances = {};
+        this._eventListeners = [];
     }
 
     Controller.prototype = {
 
-        render: function(cb) {
-            try {
-                if (this._destroyed) {
-                    throw new Error('Cannot call `render` on a destroyed Controller');
-                }
+        _resolveDataSourceCollection: function(index, data, collection, cb) {
+            var keys = Object.keys(collection),
+                l = keys.length,
+                i = 0,
+                self = this,
+                changeListenerDestructorsForIndex = this._changeListenerDestructors[index];
 
-                var datasources = this.datasources,
-                    self = this,
-                    newData = {};
-
-                if (this._pending) {
-                    this._pending.cancelled = true;
-                }
-
-                var pending = this._pending = {};
-
-                self._changeListenerDestroyFunctions.forEach(function(destroy) {
+            if (changeListenerDestructorsForIndex) {
+                changeListenerDestructorsForIndex.forEach(function(destroy) {
                     destroy();
                 });
+            } else {
+                this._changeListenerDestructors[index] = changeListenerDestructorsForIndex = [];
+            }
 
-                self._manualListenerDestroyFunctions.forEach(function(destroy) {
-                    destroy();
-                });
+            function check(key, result) {
+                var modelKey = result instanceof ModelValue && result.key;
 
-                var changeListenerDestroyFunctions = self._changeListenerDestroyFunctions = [];
+                if (typeof modelKey === 'string') {
+                    changeListenerDestructorsForIndex.push(model.observe(modelKey, function() {
+                        self.start(index);
+                    }));
 
-                self._manualListenerDestroyFunctions = [];
-
-                function completer(error) {
-                    if (!error) {
-                        self._built = true;
-                    }
-
-                    if (cb) {
-                        cb(error);
-                    }
+                    result = result.value;
                 }
 
-                var callBacks;
+                data[key] = result;
 
-                if (datasources) {
-                    datasources = (datasources instanceof Array && datasources) || [datasources];
+                if (++i === l) {
+                    cb();
+                }
+            }
 
-                    callBacks = new Array(datasources.length);
+            keys.forEach(function(key) {
+                try {
+                    var result = collection[key].call(self, data);
+                    if (result && typeof result.then === 'function') {
+                        result.then(function(deferredResult) {
+                            check(key, deferredResult);
+                        }, cb);
+                    } else {
+                        check(key, result);
+                    }
+                } catch (e) {
+                    cb(e);
+                }
+            });
+        },
 
-                    datasources.forEach(function(source, i) {
-                        callBacks[i] = function(dsCb) {
-                            var sourceKeys = Object.keys(source),
-                                results = new Array(sourceKeys.length),
-                                c = 0;
+        _resolveDataSources: function(resolveFrom, cb) {
+            var datasources = this.datasources,
+                data = {},
+                self = this;
 
-                            sourceKeys.forEach(function(sourceKey, k) {
-                                var sourceResult = source[sourceKey].call(self, newData);
+            if (datasources) {
+                if (datasources instanceof Array) {
+                    var i = resolveFrom,
+                        l = datasources.length;
 
-                                function resultResolver(mr) {
-                                    try {
-                                        results[k] = mr;
-
-                                        if (++c === sourceKeys.length) {
-                                            results.forEach(function(result, j) {
-                                                var modelKey = result instanceof ModelValue && result.key;
-
-                                                if (typeof modelKey === 'string') {
-                                                    changeListenerDestroyFunctions.push(model.observe(modelKey, function() {
-                                                        if (!self._destroyed) {
-                                                            self.render();
-                                                        }
-                                                    }));
-
-                                                    result = result.value;
-                                                }
-
-                                                newData[sourceKeys[j]] = result;
-                                            });
-
-                                            dsCb();
-                                        }
-                                    } catch (e) {
-                                        // TODO short circuit
-                                        dsCb(e);
-                                    }
+                    (function iterate() {
+                        self._resolveDataSourceCollection(i, data, datasources[i], function(error) {
+                            if (error) {
+                                if (cb) {
+                                    cb(error);
                                 }
+                            } else if (++i < l) {
+                                iterate();
+                            } else {
+                                self._data = Object.freeze(data);
 
-                                if (sourceResult && typeof sourceResult.then === 'function') {
-                                    sourceResult.then(function(result) {
-                                        if (!pending.cancelled && !self._destroyed) {
-                                            resultResolver(result);
-                                        } else {
-                                            // TODO short circuit
-                                            dsCb(new CancellationError());
-                                        }
-                                    });
-                                } else {
-                                    resultResolver(sourceResult);
+                                if (cb) {
+                                    cb();
                                 }
-                            });
-                        };
+                            }
+                        });
+                    }());
+                } else {
+                    this._resolveDataSourceCollection(null, data, datasources, function(error) {
+                        if (error) {
+                            cb(error);
+                        } else {
+                            self._data = Object.freeze(data);
+
+                            if (cb) {
+                                cb();
+                            }
+                        }
                     });
                 }
+            } else if (cb) {
+                cb();
+            }
+        },
 
-                (function reducer(error) {
-                    if (error) {
-                        completer(error);
-                    } else if (callBacks && callBacks.length) {
-                        callBacks.shift()(reducer);
-                    } else {
-                        self._data = Object.freeze(newData);
-                        self._pending = null;
-                        self._transform(self.el);
-                        self._initializeEvents();
+        _render: function() {
+            var newEl = document.createElement('body'),
+                closingTag = '</' + this.el.tagName.toLowerCase() + '>';
 
-                        if (!self._built) {
-                            var children = self._createChildren();
+            newEl.innerHTML = this.el.outerHTML.replace(this.el.innerHTML + closingTag, this.generateHTML(this._data) + closingTag);
 
-                            if (children) {
-                                if (!(children instanceof Array)) {
-                                    children = [children];
+            return newEl;
+        },
+
+        _attachEventHandlers: function() {
+            var events = this.events;
+
+            if (events && typeof events === 'object') {
+                var childInstances = this._childInstances,
+                    self = this;
+
+                self._eventListeners.forEach(function(destroy) {
+                    destroy();
+                });
+
+                Object.keys(events).forEach(function(key) {
+                    var j = key.indexOf(' '),
+                        type = key.substring(0, j),
+                        eventTargets = self.el.querySelectorAll(key.substring(j + 1, key.length));
+
+                    if (eventTargets) {
+                        var childInstancesKeys = Object.keys(childInstances),
+                            l = childInstancesKeys.length,
+                            handler = function(event) {
+                                var isRelevantNode = true,
+                                    eventTarget = event.target;
+
+                                if (eventTarget !== this) {
+                                    while (eventTarget) {
+                                        if (eventTarget === self.el) {
+                                            break;
+                                        } else {
+                                            for (var i = 0; i < childInstancesKeys.length; i++) {
+                                                if (childInstances[childInstancesKeys[i]].el === eventTarget) {
+                                                    isRelevantNode = false;
+
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        eventTarget = eventTarget.parentNode;
+                                    }
                                 }
 
-                                var count = 0;
+                                if (isRelevantNode) {
+                                    event.stopPropagation();
 
-                                children.forEach(function(child, i) {
-                                    if (!child._selector) {
-                                        throw new Error('Child controller root elements must be initialized with a string selector and not an element reference!');
+                                    events[key].call(self, event);
+                                }
+                            };
+
+                        if (l) {
+                            eventTargets = Array.prototype.filter.call(eventTargets, function(node) {
+                                while (node) {
+                                    if (node === self.el) {
+                                        return true;
                                     } else {
-                                        child.el = self.el.querySelector(child._selector);
+                                        for (var i = 0; i < l; i++) {
+                                            if (childInstances[childInstancesKeys[i]].el === node) {
+                                                return false;
+                                            }
+                                        }
                                     }
 
-                                    child.render(function(childError) {
-                                        if (childError) {
-                                            completer(childError);
+                                    node = node.parentNode;
+                                }
 
-                                            // TODO short circuit
-                                        } else if (++count === children.length) {
-                                            completer();
-                                        }
-                                    });
-
-                                    self._children.push(child);
-                                });
-                            } else {
-                                completer();
-                            }
-                        } else {
-                            completer();
+                                return false;
+                            });
                         }
+
+                        Array.prototype.forEach.call(eventTargets, function(selected) {
+                            selected.addEventListener(type, handler);
+
+                            self._eventListeners.push(function() {
+                                selected.removeEventListener(type, handler);
+                            });
+                        });
                     }
-                }());
-            } catch (e) {
-                completer(e);
+                });
+            }
+        },
+
+        _transform: function(target, newEl, cb) {
+            var childInstances = this._childInstances,
+                childrenToRender = 0,
+                childrenRendered = 0,
+                self = this;
+
+            DOMTransform(newEl.childNodes[0], target, childInstances);
+
+            self.el = target;
+
+            for (var selector in this.children) {
+                var childTarget = target.querySelector(selector);
+
+                if (childTarget) {
+                    if (!childInstances[selector]) {
+                        childInstances[selector] = this.children[selector].call(this, childTarget);
+
+                        childrenToRender++;
+
+                        childInstances[selector].start(function(error) {
+                            if (error) {
+                                if (cb) {
+                                    cb(error);
+                                }
+                            } else if (++childrenRendered === childrenToRender) {
+                                self._attachEventHandlers();
+
+                                if (cb) {
+                                    cb();
+                                }
+                            }
+                        });
+                    }
+                } else if (childInstances[selector]) {
+                    childInstances[selector].destroy();
+
+                    delete childInstances[selector];
+                }
+            }
+
+            if (!childrenToRender) {
+                this._attachEventHandlers();
+
+                if (cb) {
+                    cb();
+                }
             }
         },
 
         generateHTML: function(data) {
             throw new Error('Controller.generateHTML must be implemented');
-        },
-
-        detach: function() {
-            if (this.el) {
-                this._changeListenerDestroyFunctions.forEach(function(destroy) {
-                    destroy();
-                });
-
-                this._manualListenerDestroyFunctions.forEach(function(destroy) {
-                    destroy();
-                });
-
-                this._children.forEach(function(child) {
-                    child.detach();
-                });
-
-                this.el.parentNode.removeChild(this.el);
-
-                this.el = null;
-            }
-
-            return this;
         },
 
         destroy: function() {
@@ -246,23 +276,27 @@ define([
                     });
                 }
 
-                this._changeListenerDestroyFunctions.forEach(function(destroy) {
+                var key;
+
+                for (key in this._changeListenerDestructors) {
+                    this._changeListenerDestructors[key].forEach(function(destroy) {
+                        destroy();
+                    });
+                }
+
+                for (key in this._childInstances) {
+                    this._childInstances[key].destroy();
+                }
+
+                this._eventListeners.forEach(function(destroy) {
                     destroy();
                 });
 
-                this._manualListenerDestroyFunctions.forEach(function(destroy) {
-                    destroy();
-                });
+                if (this.el.parentNode) {
+                    this.el.parentNode.removeChild(this.el);
+                }
 
-                this._children.forEach(function(child) {
-                    child.destroy();
-                });
-
-                this._children = null;
-
-                this.el.parentNode.removeChild(this.el);
-
-                this.el = null;
+                this._changeListenerDestructors = this._childInstances = this._eventListeners = null;
 
                 this._destroyed = true;
             }
@@ -295,96 +329,35 @@ define([
             return this;
         },
 
-        _createChildren: function() {},
-
-        _initializeEvents: function() {
-            if (this.manualHandlers) {
-                var manualListenerDestroyFunctions = this._manualListenerDestroyFunctions,
-                    el = this.el,
-                    children = this._children;
-
-                this.manualHandlers.forEach(function(handler) {
-                    var elements = el.querySelectorAll(handler.selector);
-
-                    if (children && children.length) {
-                        elements = Array.prototype.filter.call(elements, function(node) {
-                            while (node) {
-                                if (node === el) {
-                                    return true;
-                                } else {
-                                    var l = children.length;
-
-                                    while (l--) {
-                                        if (children[l].el === node) {
-                                            return false;
-                                        }
-                                    }
-                                }
-
-                                node = node.parentNode;
-                            }
-                        });
-                    }
-
-                    Array.prototype.forEach.call(elements, function(selected) {
-                        selected.addEventListener(handler.type, handler.handler);
-
-                        manualListenerDestroyFunctions.push(function() {
-                            selected.removeEventListener(handler.type, handler.handler);
-                        });
-                    });
-                });
+        start: function(resolveFrom, cb) {
+            if (this._destroyed) {
+                throw new Error('Cannot start destroyed Controller!');
             }
-        },
 
-        _transform: function(el) {
-            if (el) {
-                var newEl = document.createElement('body'),
-                    closingTag = '</' + this.el.tagName.toLowerCase() + '>',
-                    html = this.el.outerHTML.replace(this.el.innerHTML + closingTag, this.generateHTML(this._data) + closingTag);
+            if (resolveFrom && typeof resolveFrom === 'function') {
+                cb = resolveFrom;
+                resolveFrom = null;
+            }
 
-                newEl.innerHTML = html;
+            var self = this;
 
-                var l = this._children.length;
-
-                while (l--) {
-                    var child = this._children[l],
-                        newChildEl = newEl.querySelector(child._selector);
-
-                    if (newChildEl && !child.el) {
-                        child.el = newChildEl;
-                    } 
-
-                    if (!child._transform(newChildEl)) {
-                        child.detach();
+            this._resolveDataSources(resolveFrom || 0, function(error) {
+                if (error) {
+                    if (cb) {
+                        cb(error);
                     }
-                }
-
-                DOMTransform(newEl.childNodes[0], el);
-
-                var childrenToProcess = this._children,
-                    newChildrenToProcess;
-
-                while (childrenToProcess.length) {
-                    newChildrenToProcess = [];
-
-                    childrenToProcess.forEach(function(c) {
-                        if (c.el) {
-                            c.el = el.querySelector(c._selector);
-                            c._manualListenerDestroyFunctions.forEach(function(destroy) {
-                                destroy();
-                            });
-                            c._initializeEvents();
-
-                            newChildrenToProcess = newChildrenToProcess.concat(c._children);
+                } else {
+                    try {
+                        self._transform(self.el, self._render(), cb);
+                    } catch (e) {
+                        if (cb) {
+                            cb(e);
                         }
-                    });
-
-                    childrenToProcess = newChildrenToProcess;
+                    }
                 }
+            });
 
-                return true;
-            }
+            return this;
         }
 
     };
