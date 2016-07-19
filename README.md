@@ -52,7 +52,7 @@ ex:
 data -> { foo : 'bar', fizz : 'buzz' }
 ```
 
-`data` will be frozen and cannot be mutated from anywhere other than `datasources`.
+`data` is a clean copy for each datasource function invocation, so any mutation (including sorting) that occurs will not be reflected downstream.
 
 Object value functions can return an immediate value or a promise.  If a value function returns the result of a call to `model.get`, the controller will automatically re-render itself if the value retrieved from `model` is updated.
 
