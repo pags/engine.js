@@ -255,6 +255,8 @@ describe('Controller', function() {
             stalledDeferred.resolve({
                 bar: 'baz'
             });
+
+            setTimeout(done, 10);
         });
     });
 

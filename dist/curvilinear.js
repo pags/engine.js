@@ -312,6 +312,7 @@
         this._changeListenerDestructors = {};
         this._childInstances = {};
         this._eventListeners = [];
+        this._cache = {};
     }
 
     Controller.prototype = {
@@ -321,6 +322,7 @@
                 l = keys.length,
                 i = 0,
                 self = this,
+                cache = this._cache,
                 changeListenerDestructorsForIndex = this._changeListenerDestructors[index];
 
             if (changeListenerDestructorsForIndex) {
@@ -344,6 +346,12 @@
 
                 data[key] = result;
 
+                if (!cache[index]) {
+                    cache[index] = {};
+                }
+
+                cache[index][key] = result;
+
                 if (++i === l) {
                     cb();
                 }
@@ -352,6 +360,7 @@
             keys.forEach(function(key) {
                 try {
                     var result = collection[key].call(self, data);
+
                     if (result && typeof result.then === 'function') {
                         result.then(function(deferredResult) {
                             check(key, deferredResult);
@@ -374,6 +383,16 @@
                 if (datasources instanceof Array) {
                     var i = resolveFrom,
                         l = datasources.length;
+
+                    if (resolveFrom > 0) {
+                        for (var j = 0; j < resolveFrom; j++) {
+                            var cacheEntries = self._cache[j];
+
+                            for (var key in cacheEntries) {
+                                data[key] = cacheEntries[key];
+                            }
+                        }
+                    }
 
                     (function iterate() {
                         self._resolveDataSourceCollection(i, data, datasources[i], function(error) {
@@ -499,7 +518,7 @@
             }
         },
 
-        _transform: function(target, newEl, cb) {
+        _transform: function(target, newEl, pending, cb) {
             var childInstances = this._childInstances,
                 childrenToRender = 0,
                 childrenRendered = 0,
@@ -515,6 +534,7 @@
                 if (childTarget) {
                     if (!childInstances[selector]) {
                         childInstances[selector] = this.children[selector].call(this, childTarget);
+                        childInstances[selector]._parentPending = pending;
 
                         childrenToRender++;
 
@@ -580,7 +600,7 @@
                     this.el.parentNode.removeChild(this.el);
                 }
 
-                this._changeListenerDestructors = this._childInstances = this._eventListeners = null;
+                this._changeListenerDestructors = this._childInstances = this._eventListeners = this._cache = null;
 
                 this._destroyed = true;
             }
@@ -625,18 +645,36 @@
 
             var self = this;
 
+            if (this._pending) {
+                this._pending.cancelled = true;
+            }
+
+            var pending = this._pending = this._parentPending || {};
+
+            function complete(error) {
+                self._pending = null;
+
+                for (var key in self._childInstances) {
+                    self._childInstances[key]._parentPending = null;
+                }
+
+                if (cb) {
+                    cb(error);
+                }
+            }
+
             this._resolveDataSources(resolveFrom || 0, function(error) {
+                if (pending.cancelled) {
+                    return;
+                }
+
                 if (error) {
-                    if (cb) {
-                        cb(error);
-                    }
+                    complete(error);
                 } else {
                     try {
-                        self._transform(self.el, self._render(), cb);
+                        self._transform(self.el, self._render(), pending, complete);
                     } catch (e) {
-                        if (cb) {
-                            cb(e);
-                        }
+                        complete(e);
                     }
                 }
             });
