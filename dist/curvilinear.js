@@ -359,7 +359,7 @@
 
             keys.forEach(function(key) {
                 try {
-                    var result = collection[key].call(self, data);
+                    var result = collection[key].call(self, JSON.parse(JSON.stringify(data)));
 
                     if (result && typeof result.then === 'function') {
                         result.then(function(deferredResult) {
