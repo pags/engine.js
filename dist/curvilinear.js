@@ -397,17 +397,11 @@
                     (function iterate() {
                         self._resolveDataSourceCollection(i, data, datasources[i], function(error) {
                             if (error) {
-                                if (cb) {
-                                    cb(error);
-                                }
+                                cb(error);
                             } else if (++i < l) {
                                 iterate();
                             } else {
-                                self._data = Object.freeze(data);
-
-                                if (cb) {
-                                    cb();
-                                }
+                                cb(null, Object.freeze(data));
                             }
                         });
                     }());
@@ -416,26 +410,13 @@
                         if (error) {
                             cb(error);
                         } else {
-                            self._data = Object.freeze(data);
-
-                            if (cb) {
-                                cb();
-                            }
+                            cb(null, Object.freeze(data));
                         }
                     });
                 }
-            } else if (cb) {
-                cb();
+            } else {
+                cb(null, Object.freeze(data));
             }
-        },
-
-        _render: function() {
-            var newEl = document.createElement('body'),
-                closingTag = '</' + this.el.tagName.toLowerCase() + '>';
-
-            newEl.innerHTML = this.el.outerHTML.replace(this.el.innerHTML + closingTag, this.generateHTML(this._data) + closingTag);
-
-            return newEl;
         },
 
         _attachEventHandlers: function() {
@@ -663,16 +644,27 @@
                 }
             }
 
-            this._resolveDataSources(resolveFrom || 0, function(error) {
-                if (pending.cancelled || (self._parentPending && self._parentPending.cancelled)) {
+            this._resolveDataSources(resolveFrom || 0, function(error, data) {
+                if (pending.cancelled) {
+                    return;
+                }
+
+                if (self._parentPending && self._parentPending.cancelled) {
+                    pending.cancelled = true;
+
                     return;
                 }
 
                 if (error) {
                     complete(error);
                 } else {
+                    var newEl = document.createElement('body'),
+                        closingTag = '</' + self.el.tagName.toLowerCase() + '>';
+
                     try {
-                        self._transform(self.el, self._render(), pending, complete);
+                        newEl.innerHTML = self.el.outerHTML.replace(self.el.innerHTML + closingTag, self.generateHTML(data) + closingTag);
+
+                        self._transform(self.el, newEl, pending, complete);
                     } catch (e) {
                         complete(e);
                     }

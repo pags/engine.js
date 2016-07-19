@@ -528,7 +528,7 @@ describe('Controller', function() {
                 } catch (error) {
                     done(error);
                 }
-            }, 5);
+            }, 10);
         });
     });
 
