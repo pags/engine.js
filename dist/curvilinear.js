@@ -184,18 +184,21 @@
                 (changeListeners[key] = (changeListeners[key] || [])).push(f);
 
                 return function remove() {
-                    var a = changeListeners[key],
-                        l = a.length;
+                    var a = changeListeners[key];
 
-                    while (l--) {
-                        if (a[l] === f) {
-                            a.splice(l, 1);
+                    if (a) {
+                        var l = a.length;
 
-                            if (!a.length) {
-                                delete changeListeners[key];
+                        while (l--) {
+                            if (a[l] === f) {
+                                a.splice(l, 1);
+
+                                if (!a.length) {
+                                    delete changeListeners[key];
+                                }
+
+                                break;
                             }
-
-                            break;
                         }
                     }
                 };
