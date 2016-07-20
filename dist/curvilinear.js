@@ -332,9 +332,9 @@
                 changeListenerDestructorsForIndex.forEach(function(destroy) {
                     destroy();
                 });
-            } else {
-                this._changeListenerDestructors[index] = changeListenerDestructorsForIndex = [];
             }
+
+            this._changeListenerDestructors[index] = changeListenerDestructorsForIndex = [];
 
             function check(key, result) {
                 var modelKey = result instanceof ModelValue && result.key;
