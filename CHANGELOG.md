@@ -1,3 +1,7 @@
+0.3.1
+=====
+Batches triggering of model observers.
+
 0.3.0
 =====
 Re-create previously removed children if root element re-appears.

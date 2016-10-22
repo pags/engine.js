@@ -153,6 +153,20 @@
         },
         changeListeners = {},
         storesForKey = {},
+        queue = {},
+        queueChange = function(key, value) {
+            if (!(key in queue)) {
+                setTimeout(function() {
+                    Object.freeze(queue[key]);
+
+                    model.trigger(key, queue[key]);
+
+                    delete queue[key];
+                }, 0);
+            }
+
+            queue[key] = value;
+        },
         model = {
 
             stores: stores,
@@ -223,8 +237,6 @@
                     throw new TypeError('model.set only accepts key of type "string"');
                 }
 
-                var self = this;
-
                 this.get(key, function(error, current) {
                     if (error) {
                         if (cb) {
@@ -235,9 +247,7 @@
 
                         (stores[storesForKey[key] || DEFAULT_STORE]).set(key, value, function(setError) {
                             if (!setError) {
-                                Object.freeze(value);
-
-                                self.trigger(key, value);
+                                queueChange(key, value);
                             }
 
                             if (cb) {
@@ -253,8 +263,6 @@
             },
 
             destroy: function(key, cb) {
-                var self = this;
-
                 this.get(key, function(error, current) {
                     if (error) {
                         if (cb) {
@@ -263,7 +271,7 @@
                     } else if (typeof current.value !== 'undefined') {
                         (stores[storesForKey[key] || DEFAULT_STORE]).destroy(key, function(destroyError) {
                             if (!destroyError) {
-                                self.trigger(key);
+                                queueChange(key, void 0);
                             }
 
                             if (cb) {

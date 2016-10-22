@@ -32,6 +32,62 @@ describe('model', function() {
         done();
     });
 
+    it('batches set', function(done) {
+        var destroy = model.observe('foo2', function(value) {
+            destroy();
+
+            if (value.items.length !== 2) {
+                done(new Error('model did not batch sets'));
+            } else {
+                done();
+            }
+        });
+
+        model.set('foo2', {
+            items: [1]
+        });
+
+        model.set('foo2', {
+            items: [1, 2]
+        });
+    });
+
+    it('batches destroy (first)', function(done) {
+        var destroy = model.observe('foo2', function(value) {
+            destroy();
+
+            if (value.items.length !== 2) {
+                done(new Error('model did not batch destroy'));
+            } else {
+                done();
+            }
+        });
+
+        model.destroy('foo2');
+
+        model.set('foo2', {
+            items: [1, 2]
+        });
+    });
+
+    it('batches destroy (last)', function(done) {
+        var destroy = model.observe('foo2', function(value) {
+            destroy();
+
+            if (value) {
+                done(new Error('model did not batch destroy'));
+            } else {
+                done();
+            }
+        });
+
+        model.set('foo2', {
+            items: [1, 2]
+        });
+
+        model.destroy('foo2');
+    });
+
     it('returns appropriate values', function(done) {
         model.get('foo', function(error, mv) {
             var value = mv.value;
@@ -148,18 +204,6 @@ describe('model', function() {
         model.set('witch', {
             seer: true
         }, function() {
-            var remove = model.observe('witch', function(newValue) {
-                try {
-                    remove();
-
-                    expect(newValue.seer).to.equal(true);
-
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            });
-
             model.get('witch', function(error, mv) {
                 expect(mv.value.seer).to.equal(true);
 
