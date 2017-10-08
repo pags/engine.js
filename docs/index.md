@@ -18,7 +18,7 @@ engine.js works with _any_ HTML templating system. Have existing templates? Grea
 
 + Data pipeline
 
-Wrangling asycnhronous data can be the hardest part of writing a complex app.  Most frameworks simply provide a specific component lifecycle function (like `componentDidMount`) as a big blank canvas for you to get yourself into trouble.
+Wrangling asycnhronous data can be the hardest part of writing a complex app.  Most frameworks simply provide a specific component lifecycle function (like `componentDidMount`) as a big blank canvas for you to shoot yourself in the foot with.
 
 engine.js introduces the concept of a _data pipeline_. With a clear declarative syntax, you can define which pieces of data your component needs in blocks of series of parallel. When a block within your pipeline changes, engine.js will automatically reprocess the pipeline from that point onward, giving each downstream block a chance to react to changes.
 
