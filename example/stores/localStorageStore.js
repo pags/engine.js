@@ -2,7 +2,7 @@
  * Allows persistence of data to local storage.
  */
 (function() {
-    curvilinear.model.registerStore('localStorage', {
+    engine.model.registerStore('localStorage', {
         get: function(key, cb) {
             var value = window.localStorage[key];
 

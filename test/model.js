@@ -1,6 +1,6 @@
 describe('model', function() {
     var expect = window.chai.expect,
-        model = window.curvilinear.model;
+        model = window.engine.model;
 
     it('returns a dummy object with a change function when no data is set', function(done) {
         model.get('foo', function(error, mv) {

@@ -1,7 +1,7 @@
-# curvilinear
+# engine.js
 Experimental MVC framework for the web.  ~2.5KB minified\gzipped, 0 dependencies, bring your own templates.  IE9+.
 
-* Composable controllers - nest your controllers and let curvilinear determine what and when to re-render.
+* Composable controllers - nest your controllers and let engine.js determine what and when to re-render.
 * Centralized model - all data flows from a single source of truth, controllers don't own state.
 * No dispatchers - each controller declares its own data dependencies and whether they should be resolved in combinations of parallel or series.
 * DOM diffing - no need to wire up tedious DOM manipulation code.
@@ -13,13 +13,13 @@ See "example/example.html".
 
 ## Usage
 
-`<script type="text/javascript" src="curvilinear/dist/curvilinear.min.js"></script>`
+`<script type="text/javascript" src="engine/dist/engine.min.js"></script>`
 
-This will expose `curvilinear` on the global object.
+This will expose `engine` on the global object.
 
 Alternatively if using require.js, simply `require` the distribution file.  No global will be exposed.
 
-### curvilinear.Controller
+### engine.Controller
 
 #### `new Controller(el)` (constructor)
 
@@ -127,7 +127,7 @@ Destroy all ownables and remove the controller.  Will automatically remove all e
 
 Will return `this` for chaining.
 
-### curvilinear.model
+### engine.model
 
 #### `get(key, callback)`
 

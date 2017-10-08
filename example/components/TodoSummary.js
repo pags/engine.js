@@ -1,12 +1,12 @@
 (function() {
-    var model = curvilinear.model;
+    var model = engine.model;
 
     window.TodoSummary = BaseController.extend({
 
         datasources: [{
 
             items: function() {
-                return Q.ninvoke(model, 'get', 'curvilinearItems');
+                return Q.ninvoke(model, 'get', 'engineItems');
             }
 
         }, {

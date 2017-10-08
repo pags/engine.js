@@ -1,12 +1,12 @@
 (function() {
-    var model = curvilinear.model;
+    var model = engine.model;
 
     window.TodoInput = BaseController.extend({
 
         events: {
 
             'change input': function(event) {
-                model.set('curvilinearItems', {
+                model.set('engineItems', {
                     text: event.target.value,
                     complete: false
                 });

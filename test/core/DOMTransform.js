@@ -6,7 +6,7 @@ describe('DOMTransform', function() {
 
             newEl.innerHTML = '<div id="sandbox" style="display:none">' + html + '</div>';
 
-            window.curvilinear.DOMTransform(newEl.childNodes[0], el);
+            window.engine.DOMTransform(newEl.childNodes[0], el);
         },
         assertTransform = function(oldHTML, newHTML, done) {
             sandbox.innerHTML = oldHTML;

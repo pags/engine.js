@@ -1,12 +1,12 @@
 (function() {
-    var model = curvilinear.model;
+    var model = engine.model;
 
     window.TodoList = BaseController.extend({
 
         events: {
 
             'change input[type="checkbox"]': function(event) {
-                model.set('curvilinearItems', {
+                model.set('engineItems', {
                     id: event.target.getAttribute('data-id'),
                     complete: event.target.checked
                 });
@@ -17,7 +17,7 @@
         datasources: [{
 
                 items: function() {
-                    return Q.ninvoke(model, 'get', 'curvilinearItems');
+                    return Q.ninvoke(model, 'get', 'engineItems');
                 }
 
             },

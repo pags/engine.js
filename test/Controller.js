@@ -1,8 +1,8 @@
 describe('Controller', function() {
     var Q = window.Q,
         expect = window.chai.expect,
-        Controller = window.curvilinear.Controller,
-        model = window.curvilinear.model,
+        Controller = window.engine.Controller,
+        model = window.engine.model,
         el,
         finalInstance,
         parentInstance,

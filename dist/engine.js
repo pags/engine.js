@@ -687,7 +687,7 @@
 
     };
 
-    var curvilinear = {
+    var engine = {
 
         DOMTransform: DOMTransform,
 
@@ -701,9 +701,9 @@
 
     if (typeof define === 'function' && define.amd) {
         define(function() {
-            return curvilinear;
+            return engine;
         });
     } else {
-        window.curvilinear = curvilinear;
+        window.engine = engine;
     }
 }());

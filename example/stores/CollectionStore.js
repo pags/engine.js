@@ -2,7 +2,7 @@
  * Allows persistence of collections.
  */
 (function() {
-    var model = curvilinear.model;
+    var model = engine.model;
 
     model.registerStore('collection', {
         get: function(key, cb) {

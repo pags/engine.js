@@ -2,7 +2,7 @@
  * Create our base controller to work with.
  */
 (function() {
-    var Controller = window.curvilinear.Controller;
+    var Controller = window.engine.Controller;
 
     function BaseController() {
         Controller.apply(this, arguments);

@@ -5,8 +5,8 @@
     // Just defining that "items" should be stored using the CollectionStore,
     // which allows the management of collections of data under a single key,
     // and saves to local storage.  Without this call, keys will use the default store (see README).
-    curvilinear.model.registerStoreForKey({
-        key: 'curvilinearItems',
+    engine.model.registerStoreForKey({
+        key: 'engineItems',
         store: 'collection'
     });
 
