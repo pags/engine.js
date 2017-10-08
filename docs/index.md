@@ -4,7 +4,7 @@
 
 In fact, you don't need to a build process at all. engine.js is written in JavaScript that is supported natively by browsers all the way back to IE9. It's also compatible with AMD and require.js right out of the box. And if you want to, you can still use popular transpilers like Browserify, Webpack, and Babel.
 
-+ It's tiny.
+##### It's tiny.
 
 engine.js is _2.5kb_ gzipped.
 
@@ -12,11 +12,11 @@ React is _34.8kb_ gzipped.
 
 Vue is _20.9kb_ gzipped.
 
-+ Your markup is your markup.
+##### Your markup is your markup.
 
 engine.js works with _any_ HTML templating system. Have existing templates? Great, use them with engine.js.
 
-+ Data pipeline
+##### Complicated asynchronous data dependencies? No problem.
 
 Wrangling asycnhronous data can be the hardest part of writing a complex app.  Most frameworks simply provide a specific component lifecycle function (like `componentDidMount`) as a big blank canvas for you to shoot yourself in the foot with.
 
