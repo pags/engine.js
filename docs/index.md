@@ -8,6 +8,6 @@ In fact, you don't need to a build process at all. engine.js is written in JavaS
 
 engine.js is _2.5kb_ gzipped.
 
-React 16 is _34.8kb_ gzipped.
+React is _34.8kb_ gzipped.
 
 Vue is _20.9kb_ gzipped.
