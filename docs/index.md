@@ -1,4 +1,4 @@
-## What's different about engine.js?
+# What's different about engine.js?
 
 ### You don't need a complicated build system just to get your app to run in a web browser.
 
@@ -22,8 +22,8 @@ Wrangling asycnhronous data can be the hardest part of writing a complex app.  M
 
 engine.js introduces the concept of a _data pipeline_. With a clear declarative syntax, you can define which pieces of data your component needs in blocks of series of parallel. When a block within your pipeline changes, engine.js will automatically reprocess the pipeline from that point onward, giving each downstream block a chance to react to changes.
 
-## Great. What does the code look like?
+# Great. What does the code look like?
 
-## Where's the TODO MVC example?
+# Where's the TODO MVC example?
 
 There isn't one.  You're going to need to create something more complicated than that, aren't you?
