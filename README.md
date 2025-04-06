@@ -1,5 +1,3 @@
-# engine.js
-
 ## Example
 
 See "example/example.html".
